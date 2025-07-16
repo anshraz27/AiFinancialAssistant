@@ -17,6 +17,7 @@ import ProfilePage from "./pages/ProfilePage";
 import TransactionsPage from "./pages/TransactionsPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
+import AddInvestmentPage from "./pages/AddInvestmentPage";
 
 function App() {
   return (
@@ -66,6 +67,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/add-investment"
+            element={
+              <ProtectedRoute>
+                <AddInvestmentPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/profile"
             element={

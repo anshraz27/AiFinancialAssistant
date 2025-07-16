@@ -16,40 +16,18 @@ import { useNavigate } from "react-router-dom"
 
 const DashboardPage = () => {
   const [financialData, setFinancialData] = useState({
-    totalBalance: 12450,
-    monthlyIncome: 5200,
-    monthlyExpenses: 3850,
-    savings: 1350,
-    savingsGoal: 2000,
+    totalBalance: 0,
+    monthlyIncome: 0,
+    monthlyExpenses: 0,
+    savings:0,
+    avingsGoal: 0,
   })
 
   const [recentTransactions] = useState([
-    { id: 1, type: "expense", category: "Food", amount: 45.5, date: "2025-06-26", description: "Lunch at Restaurant" },
-    { id: 2, type: "income", category: "Salary", amount: 2600, date: "2025-06-25", description: "Monthly Salary" },
-    { id: 3, type: "expense", category: "Transport", amount: 25.0, date: "2025-06-24", description: "Uber Ride" },
-    {
-      id: 4,
-      type: "expense",
-      category: "Shopping",
-      amount: 120.75,
-      date: "2025-06-23",
-      description: "Grocery Shopping",
-    },
-    {
-      id: 5,
-      type: "income",
-      category: "Freelance",
-      amount: 500,
-      date: "2025-06-22",
-      description: "Web Design Project",
-    },
   ])
 
   const [budgetCategories] = useState([
-    { category: "Food", spent: 450, budget: 600, color: "bg-red-500" },
-    { category: "Transport", spent: 200, budget: 300, color: "bg-blue-500" },
-    { category: "Entertainment", spent: 150, budget: 200, color: "bg-green-500" },
-    { category: "Shopping", spent: 300, budget: 400, color: "bg-purple-500" },
+   
   ])
 
   const savingsProgress = (financialData.savings / financialData.savingsGoal) * 100
@@ -97,8 +75,8 @@ const DashboardPage = () => {
             </div>
             <div className="flex items-center mt-4 text-sm">
               <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-500 font-medium">+12.5%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
+              <span className="text-green-500 font-medium"></span>
+              <span className="text-gray-500 ml-1"></span>
             </div>
           </div>
 
@@ -114,8 +92,8 @@ const DashboardPage = () => {
             </div>
             <div className="flex items-center mt-4 text-sm">
               <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-500 font-medium">+8.2%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
+              <span className="text-green-500 font-medium"></span>
+              <span className="text-gray-500 ml-1"></span>
             </div>
           </div>
 
@@ -131,8 +109,8 @@ const DashboardPage = () => {
             </div>
             <div className="flex items-center mt-4 text-sm">
               <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-              <span className="text-red-500 font-medium">+3.1%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
+              <span className="text-red-500 font-medium"></span>
+              <span className="text-gray-500 ml-1"></span>
             </div>
           </div>
 

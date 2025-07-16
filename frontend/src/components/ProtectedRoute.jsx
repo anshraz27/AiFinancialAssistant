@@ -1,10 +1,14 @@
 import { Navigate } from "react-router-dom"
 
 const ProtectedRoute = ({ children }) => {
-  // In a real app, you'd check authentication status from context/state
+  // Check both authentication state and token
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true"
+  const token = localStorage.getItem("token")
+  
+  // User is authenticated if both isAuthenticated is true and token exists
+  const isUserAuthenticated = isAuthenticated && token
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />
+  return isUserAuthenticated ? children : <Navigate to="/login" replace />
 }
 
 export default ProtectedRoute

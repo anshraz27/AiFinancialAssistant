@@ -1,5 +1,6 @@
-// Backend User model example
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const { selectFields } = require("express-validator/lib/field-selection");
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,40 +24,8 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false, // Don't include password in queries by default
-    },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    emailVerificationToken: {
-      type: String,
       select: false,
-    },
-    passwordResetToken: {
-      type: String,
-      select: false,
-    },
-    passwordResetExpires: {
-      type: Date,
-      select: false,
-    },
-    lastLogin: {
-      type: Date,
-    },
-    preferences: {
-      marketingEmails: {
-        type: Boolean,
-        default: false,
-      },
-      currency: {
-        type: String,
-        default: "USD",
-      },
-      timezone: {
-        type: String,
-        default: "UTC",
-      },
+      
     },
     profile: {
       avatar: String,
@@ -72,15 +41,36 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-// Index for efficient queries
-userSchema.index({ email: 1 });
-
-// Virtual for full name
 userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next(); // Only hash if changed
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Method to compare passwords
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!candidatePassword || !this.password) {
+    throw new Error("Password and hash are required for comparison");
+  }
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// ✅ Hide sensitive fields like password
+userSchema.methods.toJSON = function () {
+  const userObject = this.toObject();
+  delete userObject.password;
+  return userObject;
+};
 
 module.exports = mongoose.model("User", userSchema);

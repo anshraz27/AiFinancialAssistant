@@ -19,24 +19,34 @@ const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState(""); // ✅ NEW: Error state
 
-  // Fetch transactions from backend on mount
+  // ✅ Fetch transactions from backend on mount
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Unauthorized. Please log in.");
+          navigate("/login");
+          return;
+        }
+
         const res = await axios.get("http://localhost:5000/api/transactions", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${token}`, 
           },
         });
+
         setTransactions(res.data.transactions);
-      } catch (error) {
-        console.error("Error fetching transactions:", error);
+      } catch (err) {
+        console.error("Error fetching transactions:", err);
+        setError("Failed to load transactions. Try again later.");
       }
     };
 
     fetchTransactions();
-  }, []);
+  }, [navigate]);
 
   const filteredTransactions = transactions.filter((transaction) => {
     const matchesFilter = filter === "all" || transaction.type === filter;
@@ -88,6 +98,13 @@ const TransactionsPage = () => {
           </div>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-6">
+            {error}
+          </div>
+        )}
+
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-lg">
@@ -127,7 +144,9 @@ const TransactionsPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Net Amount</p>
                 <p
-                  className={`text-2xl font-bold ${netAmount >= 0 ? "text-green-600" : "text-red-600"}`}
+                  className={`text-2xl font-bold ${
+                    netAmount >= 0 ? "text-green-600" : "text-red-600"
+                  }`}
                 >
                   {netAmount >= 0 ? "+" : "-"}$
                   {Math.abs(netAmount).toLocaleString()}
@@ -190,63 +209,71 @@ const TransactionsPage = () => {
               Transactions ({filteredTransactions.length})
             </h2>
           </div>
-          <div className="divide-y divide-gray-200">
-            {filteredTransactions.map((transaction) => (
-              <div
-                key={transaction._id}
-                className="p-6 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        transaction.type === "income"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {transaction.type === "income" ? (
-                        <ArrowUpRight className="w-6 h-6" />
-                      ) : (
-                        <ArrowDownRight className="w-6 h-6" />
-                      )}
+          {filteredTransactions.length > 0 ? (
+            <div className="divide-y divide-gray-200">
+              {filteredTransactions.map((transaction) => (
+                <div
+                  key={transaction._id}
+                  className="p-6 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          transaction.type === "income"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-red-100 text-red-600"
+                        }`}
+                      >
+                        {transaction.type === "income" ? (
+                          <ArrowUpRight className="w-6 h-6" />
+                        ) : (
+                          <ArrowDownRight className="w-6 h-6" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {transaction.description}
+                        </h3>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                          <span>
+                            {transaction.category?.name || "Uncategorized"}
+                          </span>
+                          <span>•</span>
+                          <span>
+                            {new Date(transaction.date).toLocaleDateString()}
+                          </span>
+                          <span>•</span>
+                          <span className="capitalize">
+                            {transaction.paymentMethod}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {transaction.description}
-                      </h3>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-                        <span>{transaction.category?.name || "Unknown"}</span>
-                        <span>•</span>
-                        <span>
-                          {new Date(transaction.date).toLocaleDateString()}
-                        </span>
-                        <span>•</span>
-                        <span className="capitalize">
-                          {transaction.paymentMethod}
-                        </span>
+                    <div className="text-right">
+                      <div
+                        className={`text-xl font-bold ${
+                          transaction.type === "income"
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {transaction.type === "income" ? "+" : "-"}$
+                        {transaction.amount.toFixed(2)}
+                      </div>
+                      <div className="text-sm text-gray-500 capitalize">
+                        {transaction.type}
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div
-                      className={`text-xl font-bold ${
-                        transaction.type === "income"
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {transaction.type === "income" ? "+" : "-"}$
-                      {transaction.amount.toFixed(2)}
-                    </div>
-                    <div className="text-sm text-gray-500 capitalize">
-                      {transaction.type}
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 text-gray-500 text-center">
+              No transactions found.
+            </div>
+          )}
         </div>
       </div>
     </div>

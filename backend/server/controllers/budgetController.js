@@ -1,156 +1,110 @@
-const Budget = require("../models/Budget")
-const budgetService = require("../services/budgetService")
-const { validationResult } = require("express-validator")
-const { AppError } = require("../middleware/errorHandler")
+const Budget = require("../models/Budget");
+const { validationResult } = require("express-validator");
+const { AppError } = require("../middleware/errorHandler");
 
-// Get all budgets for a user
-exports.getBudgets = async (req, res, next) => {
+const AddBudget = async (req, res) => {
   try {
-    const { period = "monthly" } = req.query
-    const budgets = await budgetService.getUserBudgets(req.user.id, period)
-
-    res.json({
-      success: true,
-      data: budgets,
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
-// Get budget by ID
-exports.getBudget = async (req, res, next) => {
-  try {
-    const budget = await Budget.findOne({
-      _id: req.params.id,
-      userId: req.user.id,
-    })
-
-    if (!budget) {
-      return next(new AppError("Budget not found", 404))
-    }
-
-    const budgetWithProgress = await budgetService.getBudgetProgress(budget)
-
-    res.json({
-      success: true,
-      data: budgetWithProgress,
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
-// Create new budget
-exports.createBudget = async (req, res, next) => {
-  try {
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return next(new AppError("Validation failed", 400, errors.array()))
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const budgetData = {
-      ...req.body,
-      userId: req.user.id,
+    const { category, amount, period, startDate, endDate } = req.body;
+    const userId = req.user._id; // Get user ID from middleware
+
+    const existingBudget = await Budget.findOne({ userId, category });
+    if (existingBudget) {
+      return res.status(400).json({ message: "Budget already exists" });
     }
 
-    const budget = await budgetService.createBudget(budgetData)
+    const budget = new Budget({
+      userId,
+      category,
+      amount,
+      period,
+      startDate,
+      endDate,
+    });
+    await budget.save();
 
     res.status(201).json({
-      success: true,
-      data: budget,
-    })
+      message: "Budget Created Successfully",
+      budget,
+    });
   } catch (error) {
-    next(error)
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
-}
+};
 
-// Update budget
-exports.updateBudget = async (req, res, next) => {
+const UpdateBudget = async (req, res) => {
   try {
-    const errors = validationResult(req)
+    const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return next(new AppError("Validation failed", 400, errors.array()))
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const budget = await Budget.findOneAndUpdate({ _id: req.params.id, userId: req.user.id }, req.body, {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const updatedBudget = await Budget.findByIdAndUpdate(id, updateData, {
       new: true,
-      runValidators: true,
-    })
-
-    if (!budget) {
-      return next(new AppError("Budget not found", 404))
+    });
+    if (!updatedBudget) {
+      return res.status(404).json({ message: "Budget not found" });
     }
 
-    res.json({
-      success: true,
-      data: budget,
-    })
+    res.json({ message: "Budget updated successfully", budget: updatedBudget });
   } catch (error) {
-    next(error)
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
-}
+};
 
-// Delete budget
-exports.deleteBudget = async (req, res, next) => {
+const DeleteBudget = async (req, res) => {
   try {
-    const budget = await Budget.findOneAndDelete({
-      _id: req.params.id,
-      userId: req.user.id,
-    })
-
-    if (!budget) {
-      return next(new AppError("Budget not found", 404))
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
+    const { id } = req.params; // assuming you pass :id in the route
 
-    res.json({
-      success: true,
-      message: "Budget deleted successfully",
-    })
+    const del = await Budget.findByIdAndDelete(id);
+    if (!del) {
+      return res.status(404).json({ message: "Budget not found" });
+    }
+    return res.json({ message: "Budget Deleted Successfully" });
   } catch (error) {
-    next(error)
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
-}
-
-// Get budget overview
-exports.getBudgetOverview = async (req, res, next) => {
+};
+const GetAllBudget = async(req,res) => {
   try {
-    const { period = "monthly" } = req.query
-    const overview = await budgetService.getBudgetOverview(req.user.id, period)
-
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const userId = req.user._id; // Get user ID from middleware
+    const budgets = await Budget.find({ userId }).sort({
+          date: -1,
+        });
+    
     res.json({
-      success: true,
-      data: overview,
-    })
+      message: "Budgets fetched successfully",
+      budgets,
+    });
+    
   } catch (error) {
-    next(error)
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+    
   }
 }
 
-// Check budget alerts
-exports.getBudgetAlerts = async (req, res, next) => {
-  try {
-    const alerts = await budgetService.checkBudgetAlerts(req.user.id)
-
-    res.json({
-      success: true,
-      data: alerts,
-    })
-  } catch (error) {
-    next(error)
-  }
-}
-
-// Get budget recommendations
-exports.getBudgetRecommendations = async (req, res, next) => {
-  try {
-    const recommendations = await budgetService.getBudgetRecommendations(req.user.id)
-
-    res.json({
-      success: true,
-      data: recommendations,
-    })
-  } catch (error) {
-    next(error)
-  }
-}
+module.exports = {
+  AddBudget,
+  UpdateBudget,
+  DeleteBudget,
+  GetAllBudget
+};

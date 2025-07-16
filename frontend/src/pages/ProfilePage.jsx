@@ -1,21 +1,49 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navbar from "../components/Navbar"
 import { User, Mail, Phone, MapPin, Calendar, Edit, Save, X } from "lucide-react"
+import API from "../../services/api";
 
 const ProfilePage = () => {
   const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 Main St, New York, NY 10001",
-    dateOfBirth: "1990-01-15",
-    occupation: "Software Engineer",
-    annualIncome: "75000",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    dateOfBirth: "",
+    occupation: "",
+    annualIncome: "",
   })
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await API.get('/auth/profile')
+        const userData = response.data.user
+        setProfileData({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          phone: userData.profile?.phone || "",
+          address: "",
+          dateOfBirth: userData.profile?.dateOfBirth?.split('T')[0] || "",
+          occupation: userData.profile?.occupation || "",
+          annualIncome: userData.profile?.annualIncome?.toString() || "",
+        })
+      } catch (err) {
+        setError(err.response?.data?.message || "Failed to fetch profile")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchProfile()
+  }, [])
 
   const handleChange = (e) => {
     setProfileData({

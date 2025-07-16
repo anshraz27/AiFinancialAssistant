@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const transactionController = require("../controllers/transactionController");
-const authMiddleware = require("../middleware/auth");
+const transactionController = require('../controllers/transactionController')
+const {protect} = require('../middleware/authMiddleware');
 
-// Protected routes
-router.get("/", authMiddleware, transactionController.getTransactions);
-router.post("/", authMiddleware, transactionController.createTransaction);
-// Add more like PUT, DELETE, stats etc.
+router.post("/add-txn",protect, transactionController.AddTransaction);
+
+//edit budget
+router.put('/:id',protect,transactionController.UpdateTransaction );
+//delete budget
+router.delete("/:id",protect, transactionController.DeleteTransaction);
+//get all transactions
+router.get('/',protect,transactionController.GetAllTransactions);
 
 module.exports = router;

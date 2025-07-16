@@ -1,11 +1,9 @@
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const {createTokenForUser} = require('../services/authentication')
 
-// JWT generator
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-};
+
 
 // Signup Controller
 const UserSignUp = async (req, res) => {
@@ -25,11 +23,19 @@ const UserSignUp = async (req, res) => {
     const user = new User({ firstName, lastName, email, password });
     await user.save();
 
-    const token = generateToken(user._id);
+    const token = createTokenForUser(user._id);
 
+    // 🔽 Set cookie
+    res.cookie("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // secure in production
+      sameSite: "Lax", // or "None" if cross-site and https
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    });
+
+    // 🔽 Return success response
     res.status(201).json({
       message: "User created successfully",
-      token,
       user: {
         id: user._id,
         firstName: user.firstName,
@@ -43,17 +49,19 @@ const UserSignUp = async (req, res) => {
   }
 };
 
+
 // Login Controller
 const UserLogin = async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -63,25 +71,48 @@ const UserLogin = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken(user._id);
-
-    res.json({
+    const token = createTokenForUser(user._id);
+    res.status(200).json({
       message: "Login successful",
       token,
+      user: {
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+// Get User Profile Controller
+const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({
       user: {
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-      },
+        profile: user.profile
+      }
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error('Profile fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
 module.exports = {
   UserSignUp,
   UserLogin,
+  getUserProfile,
 };
