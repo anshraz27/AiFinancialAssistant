@@ -6,7 +6,7 @@ const {
   updateInvestment,
   deleteInvestment,
   getPortfolioSummary,
-  getAllocationByType
+  getAllocationByType,
 } = require("../controllers/investmentController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -16,24 +16,25 @@ const router = express.Router();
 router.use(protect);
 
 // Get all investments
-router.get("/", getInvestments);
+router.get("/all",protect, getInvestments);
 
 // Get investment by ID
-router.get("/:id", getInvestmentById);
+router.get("/:id",protect, getInvestmentById);
 
 // Create new investment
-router.post("/", createInvestment);
+router.post("/",protect, createInvestment);
 
 // Update investment
-router.put("/:id", updateInvestment);
+router.put("/:id",protect, updateInvestment);
 
 // Delete investment
-router.delete("/:id", deleteInvestment);
+router.delete("/:id",protect, deleteInvestment);
 
 // Get portfolio summary
-router.get("/summary/portfolio", getPortfolioSummary);
+router.get("/summary/portfolio",protect, getPortfolioSummary);
 
 // Get allocation by type
-router.get("/summary/allocation", getAllocationByType);
+router.get("/summary/allocation",protect, getAllocationByType);
+
 
 module.exports = router;
