@@ -3,18 +3,24 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import {
-  Camera,
-  Upload,
-  DollarSign,
-  Calendar,
-  Tag,
-  FileText,
-} from "lucide-react";
 import { useForm } from "react-hook-form";
+import { DollarSign, Calendar, FileText, Layers, Upload } from "lucide-react";
 import API from "../../services/api";
 
-const AddExpensePage = () => {
+const investmentTypes = [
+  "stock",
+  "bond",
+  "etf",
+  "mutual_fund",
+  "crypto",
+  "real_estate",
+  "commodity",
+  "other",
+];
+
+const currencies = ["USD", "EUR", "GBP", "JPY", "INR", "AUD", "CAD"];
+
+const AddInvestmentPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState("");
@@ -22,274 +28,227 @@ const AddExpensePage = () => {
   const {
     register,
     handleSubmit,
-    reset,
     watch,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      amount: "",
-      category: "",
-      description: "",
-      date: new Date().toISOString().split("T")[0],
-      paymentMethod: "card",
-      receipt: null,
+      symbol: "",
+      name: "",
+      type: "stock",
+      quantity: "",
+      purchasePrice: "",
+      purchaseDate: new Date().toISOString().split("T")[0],
+      platform: "",
+      sector: "",
+      currency: "USD",
+      proof: null,
+      notes: "",
     },
   });
 
   const watchedValues = watch();
 
-  const categories = [
-    "Food & Dining",
-    "Transportation",
-    "Shopping",
-    "Entertainment",
-    "Bills & Utilities",
-    "Healthcare",
-    "Education",
-    "Travel",
-    "Other",
-  ];
-
   const onSubmit = async (data) => {
     setIsLoading(true);
     setServerError("");
-    
-    // Debug: Check if token exists
-    const token = localStorage.getItem("token");
-    console.log("Token exists:", !!token);
-    console.log("Token value:", token ? token.substring(0, 20) + "..." : "No token");
-    
+
     try {
       const formData = new FormData();
-      formData.append("type", "expense"); // Add transaction type
-      formData.append("amount", data.amount);
-      formData.append("category", data.category);
-      formData.append("description", data.description);
-      formData.append("date", data.date);
-      formData.append("paymentMethod", data.paymentMethod);
-      if (data.receipt && data.receipt[0]) {
-        formData.append("receipt", data.receipt[0]);
-      }
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === "proof" && value?.[0]) {
+          formData.append("proof", value[0]);
+        } else {
+          formData.append(key, value);
+        }
+      });
 
-      await API.post("/transactions/add-txn", formData);
-
+      await API.post("/investments/add-investment", formData);
       reset();
-      navigate("/dashboard");
+      navigate("/investments");
     } catch (err) {
-      console.log("API Error:", err.response?.data);
       setServerError(
-        err.response?.data?.message ||
-          "Failed to add expense. Please try again."
+        err.response?.data?.message || "Failed to add investment. Try again."
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleReceiptScan = () => {
-    alert(
-      "AI Receipt Scanner activated! In a real app, this would open camera/file picker and extract data using AI."
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Add Expense</h1>
-            <p className="text-gray-600 mt-2">
-              Track your spending and keep your budget on track.
-            </p>
-          </div>
-
-          {/* AI Receipt Scanner */}
-          <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-2 border-dashed border-blue-200">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Camera className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                AI Receipt Scanner
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Snap a photo of your receipt and let AI extract the details
-                automatically.
-              </p>
-              <button
-                type="button"
-                onClick={handleReceiptScan}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
-              >
-                Scan Receipt
-              </button>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold mb-6">Add New Investment</h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Amount */}
+            {/* Symbol */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <DollarSign className="w-4 h-4 inline mr-2" />
-                Amount
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  $
-                </span>
-                <input
-                  type="number"
-                  step="0.01"
-                  {...register("amount", { required: "Amount is required" })}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="0.00"
-                />
-              </div>
-              {errors.amount && (
-                <p className="text-red-600 text-sm">{errors.amount.message}</p>
+              <label className="block mb-1 font-medium">Ticker Symbol</label>
+              <input
+                type="text"
+                {...register("symbol", { required: "Symbol is required" })}
+                placeholder="e.g., AAPL"
+                className="w-full px-4 py-3 border rounded-lg"
+              />
+              {errors.symbol && (
+                <p className="text-red-600 text-sm">{errors.symbol.message}</p>
               )}
             </div>
 
-            {/* Category */}
+            {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Tag className="w-4 h-4 inline mr-2" />
-                Category
-              </label>
+              <label className="block mb-1 font-medium">Asset Name</label>
+              <input
+                type="text"
+                {...register("name", { required: "Name is required" })}
+                placeholder="Apple Inc."
+                className="w-full px-4 py-3 border rounded-lg"
+              />
+              {errors.name && (
+                <p className="text-red-600 text-sm">{errors.name.message}</p>
+              )}
+            </div>
+
+            {/* Type */}
+            <div>
+              <label className="block mb-1 font-medium">Type</label>
               <select
-                {...register("category", { required: "Category is required" })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                {...register("type")}
+                className="w-full px-4 py-3 border rounded-lg"
               >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
+                {investmentTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
                   </option>
                 ))}
               </select>
-              {errors.category && (
+            </div>
+
+            {/* Quantity */}
+            <div>
+              <label className="block mb-1 font-medium">Quantity</label>
+              <input
+                type="number"
+                step="any"
+                {...register("quantity", { required: "Quantity is required" })}
+                className="w-full px-4 py-3 border rounded-lg"
+              />
+              {errors.quantity && (
                 <p className="text-red-600 text-sm">
-                  {errors.category.message}
+                  {errors.quantity.message}
                 </p>
               )}
             </div>
 
-            {/* Description */}
+            {/* Purchase Price */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <FileText className="w-4 h-4 inline mr-2" />
-                Description
-              </label>
+              <label className="block mb-1 font-medium">Purchase Price</label>
               <input
-                type="text"
-                {...register("description", {
-                  required: "Description is required",
+                type="number"
+                step="any"
+                {...register("purchasePrice", {
+                  required: "Purchase price is required",
                 })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="What did you spend on?"
+                className="w-full px-4 py-3 border rounded-lg"
               />
-              {errors.description && (
+              {errors.purchasePrice && (
                 <p className="text-red-600 text-sm">
-                  {errors.description.message}
+                  {errors.purchasePrice.message}
                 </p>
               )}
             </div>
 
             {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="w-4 h-4 inline mr-2" />
-                Date
-              </label>
+              <label className="block mb-1 font-medium">Purchase Date</label>
               <input
                 type="date"
-                {...register("date", { required: "Date is required" })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                {...register("purchaseDate")}
+                className="w-full px-4 py-3 border rounded-lg"
               />
-              {errors.date && (
-                <p className="text-red-600 text-sm">{errors.date.message}</p>
-              )}
             </div>
 
-            {/* Payment Method */}
+            {/* Platform */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Payment Method
-              </label>
-              <div className="grid grid-cols-3 gap-4">
-                {["card", "cash", "bank"].map((method) => (
-                  <label key={method} className="relative">
-                    <input
-                      type="radio"
-                      value={method}
-                      {...register("paymentMethod", { required: true })}
-                      className="sr-only"
-                    />
-                    <div
-                      className={`p-4 border-2 rounded-lg text-center cursor-pointer transition-all ${
-                        watchedValues.paymentMethod === method
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
-                          : "border-gray-300 hover:border-gray-400"
-                      }`}
-                    >
-                      <span className="font-medium capitalize">{method}</span>
-                    </div>
-                  </label>
+              <label className="block mb-1 font-medium">Platform</label>
+              <input
+                type="text"
+                {...register("platform")}
+                placeholder="e.g., Zerodha, Robinhood"
+                className="w-full px-4 py-3 border rounded-lg"
+              />
+            </div>
+
+            {/* Sector */}
+            <div>
+              <label className="block mb-1 font-medium">Sector</label>
+              <input
+                type="text"
+                {...register("sector")}
+                className="w-full px-4 py-3 border rounded-lg"
+              />
+            </div>
+
+            {/* Currency */}
+            <div>
+              <label className="block mb-1 font-medium">Currency</label>
+              <select
+                {...register("currency")}
+                className="w-full px-4 py-3 border rounded-lg"
+              >
+                {currencies.map((cur) => (
+                  <option key={cur} value={cur}>
+                    {cur}
+                  </option>
                 ))}
-              </div>
-              {errors.paymentMethod && (
-                <p className="text-red-600 text-sm">
-                  Payment method is required
-                </p>
-              )}
+              </select>
             </div>
 
-            {/* Receipt Upload */}
+            {/* Notes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Upload className="w-4 h-4 inline mr-2" />
-                Receipt (Optional)
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                <input
-                  type="file"
-                  accept="image/*"
-                  {...register("receipt")}
-                  className="hidden"
-                  id="receipt-upload"
-                />
-                <label htmlFor="receipt-upload" className="cursor-pointer">
-                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">Click to upload receipt image</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    PNG, JPG up to 10MB
-                  </p>
-                </label>
-              </div>
+              <label className="block mb-1 font-medium">Notes</label>
+              <textarea
+                {...register("notes")}
+                rows={3}
+                className="w-full px-4 py-3 border rounded-lg"
+                placeholder="Additional info about this investment..."
+              />
+            </div>
+
+            {/* Proof (file upload) */}
+            <div>
+              <label className="block mb-1 font-medium">Upload Proof</label>
+              <input
+                type="file"
+                accept="image/*"
+                {...register("proof")}
+                className="block w-full text-sm text-gray-500"
+              />
             </div>
 
             {/* Server Error */}
             {serverError && (
-              <p className="text-red-600 text-center">{serverError}</p>
+              <p className="text-red-600 text-sm text-center">{serverError}</p>
             )}
 
-            {/* Submit Buttons */}
-            <div className="flex space-x-4 pt-6">
+            {/* Submit */}
+            <div className="flex space-x-4 pt-4">
               <button
                 type="button"
-                onClick={() => navigate("/dashboard")}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                onClick={() => navigate("/investments")}
+                className="flex-1 px-4 py-3 border rounded-lg text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400"
               >
-                {isLoading ? "Adding..." : "Add Expense"}
+                {isLoading ? "Saving..." : "Save Investment"}
               </button>
             </div>
           </form>
@@ -299,4 +258,4 @@ const AddExpensePage = () => {
   );
 };
 
-export default AddExpensePage;
+export default AddInvestmentPage;
