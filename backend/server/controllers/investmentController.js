@@ -4,7 +4,12 @@ const { protect } = require("../middleware/authMiddleware");
 // Get all investments for user
 const getInvestments = async (req, res) => {
   try {
-    const investments = await Investment.find({ userId: req.user._id, isActive: true });
+    const investments = await Investment.find({
+      userId: req.user._id,
+      isActive: true,
+    })
+      .sort({ createdAt: -1 })
+      .limit(5);
     res.status(200).json(investments);
   } catch (error) {
     console.error("Error fetching investments:", error);
@@ -142,17 +147,6 @@ const deleteInvestment = async (req, res) => {
   }
 };
 
-// Get portfolio summary
-const getPortfolioSummary = async (req, res) => {
-  try {
-    const summary = await Investment.getPortfolioSummary(req.user._id);
-    res.status(200).json(summary[0] || {});
-  } catch (error) {
-    console.error("Error getting portfolio summary:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
 // Get allocation by type
 const getAllocationByType = async (req, res) => {
   try {
@@ -164,6 +158,34 @@ const getAllocationByType = async (req, res) => {
   }
 };
 
+
+getPortfolioSummary = async (req, res, next) => {
+  try {
+    const investments = await Investment.find({ user: req.user.id });
+
+    const totalCost = investments.reduce(
+      (acc, inv) => acc + inv.purchasePrice * inv.quantity,
+      0
+    );
+    const totalValue = investments.reduce(
+      (acc, inv) => acc + inv.currentPrice * inv.quantity,
+      0
+    );
+    const totalGainLoss = totalValue - totalCost;
+    const gainLossPercentage =
+      totalCost > 0 ? (totalGainLoss / totalCost) * 100 : 0;
+
+    res.status(200).json({
+      totalCost,
+      totalValue,
+      totalGainLoss,
+      gainLossPercentage,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getInvestments,
   getInvestmentById,
@@ -171,5 +193,5 @@ module.exports = {
   updateInvestment,
   deleteInvestment,
   getPortfolioSummary,
-  getAllocationByType
+  getAllocationByType,
 };
