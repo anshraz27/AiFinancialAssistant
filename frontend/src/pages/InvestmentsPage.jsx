@@ -11,11 +11,7 @@ import {
   BarChart3,
   Loader2
 } from "lucide-react"
-import { 
-  getInvestments,
-  getPortfolioSummary,
-  getAllocationByType
-} from "../../services/api"
+import API from "../../services/api"
 
 import {useNavigate} from "react-router-dom";
 
@@ -23,17 +19,15 @@ import {useNavigate} from "react-router-dom";
 const InvestmentsPage = () => {
   const navigate = useNavigate();
   const [investments, setInvestments] = useState([])
-  const [portfolioSummary, setPortfolioSummary] = useState(null)
+  const [portfolioSummary, setPortfolioSummary] = useState()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const [investmentsRes, summaryRes] = await Promise.all([
-          getInvestments(),
-          getPortfolioSummary()
-        ])
+        const  summaryRes= await API.get('/investments/summary/portfolio');
+        const investmentsRes = await API.get('/investments/all');
         
         setInvestments(investmentsRes.data)
         setPortfolioSummary(summaryRes.data)
