@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navbar from "../components/Navbar"
+import API from "../../services/api";
 import {
   TrendingUp,
   TrendingDown,
@@ -20,15 +21,38 @@ const DashboardPage = () => {
     monthlyIncome: 0,
     monthlyExpenses: 0,
     savings:0,
-    avingsGoal: 0,
+    savingsGoal: 0,
   })
+  const [recentTransactions, setRecentTransactions] = useState([]);
 
-  const [recentTransactions] = useState([
-  ])
 
-  const [budgetCategories] = useState([
-   
-  ])
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const summaryRes = await API.get("/dashboard/summary");
+        const summary = summaryRes.data?.data || {};
+
+        setFinancialData({
+          totalBalance:
+            (summary.totalIncome || 0) - (summary.totalExpense || 0),
+          monthlyIncome: summary.monthlyIncome || 0,
+          monthlyExpenses: summary.monthlyExpense || 0,
+          savings: summary.savings || 0,
+          savingsGoal: 10000,
+        });
+
+        const transactionsRes = await API.get("/dashboard/recent");
+        setRecentTransactions(transactionsRes.data?.transactions || []);
+      } catch (err) {
+        console.error("Failed to load dashboard data:", err);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+
+
 
   const savingsProgress = (financialData.savings / financialData.savingsGoal) * 100
 
@@ -191,7 +215,7 @@ const DashboardPage = () => {
               <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">Manage</button>
             </div>
             <div className="space-y-6">
-              {budgetCategories.map((item, index) => (
+              {/* {budgetCategories.map((item, index) => (
                 <div key={index}>
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium text-gray-900">{item.category}</span>
@@ -207,7 +231,7 @@ const DashboardPage = () => {
                   </div>
                   <div className="text-xs text-gray-500 mt-1">{Math.round((item.spent / item.budget) * 100)}% used</div>
                 </div>
-              ))}
+              ))} */}
             </div>
           </div>
         </div>
