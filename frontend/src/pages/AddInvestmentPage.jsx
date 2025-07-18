@@ -1,8 +1,7 @@
-"use client"; // This line is safe to keep for clarity, though not needed in React+Vite
+"use client";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { createInvestment } from "../../services/api";
 import Navbar from "../components/Navbar";
 
@@ -20,7 +19,7 @@ const investmentTypes = [
 const currencies = ["USD", "EUR", "GBP", "JPY", "INR", "AUD", "CAD"];
 
 const AddInvestmentPage = () => {
-  const navigate = useNavigate(); // ✅ Correct usage
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     symbol: "",
     name: "",
@@ -61,7 +60,7 @@ const AddInvestmentPage = () => {
 
     try {
       await createInvestment(formData);
-      navigate("/investments"); // ✅ React Router navigation
+      navigate("/investments");
     } catch (err) {
       console.error("Error creating investment:", err);
       setError(err.response?.data?.message || "Failed to create investment");
@@ -73,7 +72,6 @@ const AddInvestmentPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
@@ -82,36 +80,166 @@ const AddInvestmentPage = () => {
 
           {error && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-red-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              </div>
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            {/* form fields unchanged, omitted for brevity */}
-            {/* Keep your fields from your original code here */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Symbol */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Symbol
+              </label>
+              <input
+                type="text"
+                name="symbol"
+                value={formData.symbol}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
 
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+
+            {/* Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Type
+              </label>
+              <select
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+              >
+                {investmentTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Quantity */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Quantity
+              </label>
+              <input
+                type="number"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleNumberChange}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+
+            {/* Purchase Price */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Purchase Price
+              </label>
+              <input
+                type="number"
+                name="purchasePrice"
+                value={formData.purchasePrice}
+                onChange={handleNumberChange}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+
+            {/* Purchase Date */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Purchase Date
+              </label>
+              <input
+                type="date"
+                name="purchaseDate"
+                value={formData.purchaseDate}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+
+            {/* Platform */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Platform
+              </label>
+              <input
+                type="text"
+                name="platform"
+                value={formData.platform}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+
+            {/* Sector */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Sector
+              </label>
+              <input
+                type="text"
+                name="sector"
+                value={formData.sector}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+              />
+            </div>
+
+            {/* Currency */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Currency
+              </label>
+              <select
+                name="currency"
+                value={formData.currency}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+              >
+                {currencies.map((cur) => (
+                  <option key={cur} value={cur}>
+                    {cur}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes
+              </label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2"
+                rows="3"
+              />
+            </div>
+
+            {/* Buttons */}
             <div className="mt-8 flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => navigate("/investments")} // ✅ Fixed
+                onClick={() => navigate("/investments")}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
               >
                 Cancel
