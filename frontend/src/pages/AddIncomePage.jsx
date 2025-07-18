@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import API from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-
+import Navbar from "../components/Navbar";
 const AddIncomePage = () => {
   const {
     register,
@@ -40,6 +40,7 @@ const AddIncomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navbar/>
       <div className="max-w-3xl mx-auto px-4 py-10">
         <h1 className="text-3xl font-bold mb-6 text-gray-800">Add Income</h1>
 
