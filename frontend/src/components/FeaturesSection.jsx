@@ -12,11 +12,7 @@ const FeaturesSection = () => {
       title: "AI-Powered Receipt Scanner",
       description: "Simply snap a photo of your receipts and let AI extract and categorize the data instantly.",
     },
-    {
-      icon: <Lightbulb className="w-8 h-8" />,
-      title: "Budget Optimization Suggestions",
-      description: "Get personalized recommendations to optimize your spending and increase savings.",
-    },
+ 
     {
       icon: <BarChart3 className="w-8 h-8" />,
       title: "Investment Dashboard",

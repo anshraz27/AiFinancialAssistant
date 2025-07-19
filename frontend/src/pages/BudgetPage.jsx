@@ -49,7 +49,7 @@ const BudgetPage = () => {
   }, []);
 
   const totalBudget = budgets.reduce(
-    (sum, item) => sum + Number(item.budget),
+    (sum, item) => sum + Number(item.amount),
     0
   );
   const totalSpent = budgets.reduce((sum, item) => sum + Number(item.spent), 0);

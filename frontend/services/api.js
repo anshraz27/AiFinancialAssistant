@@ -58,4 +58,5 @@ export const deleteInvestment = (id) => API.delete(`/investments/${id}`);
 export const getPortfolioSummary = () => API.get("/investments/summary/portfolio");
 export const getAllocationByType = () => API.get("/investments/summary/allocation");
 
+
 export default API;

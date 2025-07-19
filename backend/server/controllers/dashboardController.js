@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Transaction = require("../models/Transaction");
+const Budget = require("../models/Budget");
 
 const getFinancialSummary = async (req, res) => {
   try {
@@ -84,12 +85,30 @@ const getFinancialSummary = async (req, res) => {
 const getRecentTransactions = async (req, res) => {
   const recent = await Transaction.find({ user: req.user._id })
     .sort({ createdAt: -1 })
-    .limit(5); // or 10
+    .limit(5); 
 
   res.status(200).json({ transactions: recent });
+};
+
+const getBudgets = async (req, res) => {
+  try {
+    const budgets = await Budget.find({ user: req.user._id })
+      .sort({ amount: -1 })
+      .limit(5);
+
+    res.status(200).json({ budgets });
+  } catch (error) {
+    console.error("Error fetching budgets:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching budgets",
+      error: error.message
+    });
+  }
 };
 
 module.exports = {
   getFinancialSummary,
   getRecentTransactions,
+  getBudgets,
 };

@@ -9,26 +9,18 @@ const rateLimit = require('express-rate-limit');
 require("dotenv").config();
 
 const authRoutes = require('./routes/authRoute');
-//const userRoutes = require('./routes/users');
 const transactionRoutes = require('./routes/transactionRoute');
 const budgetRoutes = require('./routes/budgetRoute');
 const investmentRoutes = require('./routes/investmentRoute');
-//const reportRoutes = require('./routes/reportRoute');
-//const aiRoutes = require('./routes/aiRoute');
 
 const errorHandler = require('./middleware/errorHandler');
+const dashboardRoute= require('./routes/dashboardRoute');
 
 const app = express();
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
-
 // Security middleware
 app.use(helmet());
-/*app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
-}));
-*/
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -45,12 +37,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
-//app.use('/api/users', userRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/investments', investmentRoutes);
-//app.use('/api/reports', reportRoutes);
-//app.use('/api/ai', aiRoutes);
+app.use('/api/dashboard',dashboardRoute);
 
 // Health check
 app.get('/api/health', (req, res) => {

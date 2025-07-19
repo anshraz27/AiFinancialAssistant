@@ -24,6 +24,7 @@ const DashboardPage = () => {
     savingsGoal: 0,
   })
   const [recentTransactions, setRecentTransactions] = useState([]);
+  const [currentBudget,setCurrentBudget] = useState([]);
 
 
   useEffect(() => {
@@ -43,6 +44,9 @@ const DashboardPage = () => {
 
         const transactionsRes = await API.get("/dashboard/recent");
         setRecentTransactions(transactionsRes.data?.transactions || []);
+
+        const budgetsRes = await API.get("/dashboard/budgets");
+        setCurrentBudget(budgetsRes.data?.budgets?.slice(0, 5) || []);
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       }
@@ -212,26 +216,36 @@ const DashboardPage = () => {
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">Budget Overview</h2>
-              <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">Manage</button>
+              <button
+              onClick={() => navigate("/budget")}
+                 className="text-blue-600 hover:text-blue-700 font-medium text-sm">Manage</button>
             </div>
-            <div className="space-y-6">
-              {/* {budgetCategories.map((item, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium text-gray-900">{item.category}</span>
-                    <span className="text-sm text-gray-500">
-                      ${item.spent}/${item.budget}
-                    </span>
+            <div className="space-y-4">
+              {currentBudget.length > 0 ? (
+                currentBudget.map((budget) => (
+                  <div
+                    key={budget.id}
+                    className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl transition-colors"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                        <PieChart className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{budget.category}</p>
+                        <p className="text-sm text-gray-500">
+                          ${budget.spent.toLocaleString()} of ${budget.amount.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-sm text-purple-600">
+                      {Math.round((budget.spent / budget.amount) * 100)}%
+                    </div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className={`${item.color} h-2 rounded-full transition-all duration-300`}
-                      style={{ width: `${(item.spent / item.budget) * 100}%` }}
-                    ></div>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">{Math.round((item.spent / item.budget) * 100)}% used</div>
-                </div>
-              ))} */}
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">No budgets found</p>
+              )}
             </div>
           </div>
         </div>
