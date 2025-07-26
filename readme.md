@@ -47,12 +47,6 @@ Track and manage spending across multiple budget categories:
 
 ---
 
-### 📈 Investment Tracker *(coming soon)*
-- Monitor your portfolio
-- Get AI-driven insights for better returns
-
----
-
 ### ✉️ Real-Time Budget Alerts
 - Get notified via email when you're close to or exceed your budget
 - Smart reminders to keep your finances in check
