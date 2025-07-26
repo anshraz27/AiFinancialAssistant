@@ -15,6 +15,8 @@ const investmentRoutes = require('./routes/investmentRoute');
 
 const errorHandler = require('./middleware/errorHandler');
 const dashboardRoute= require('./routes/dashboardRoute');
+const reportRoute = require('./routes/reportRoute');
+
 
 const app = express();
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
@@ -41,6 +43,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/investments', investmentRoutes);
 app.use('/api/dashboard',dashboardRoute);
+app.use('/api/reports',reportRoute);
 
 // Health check
 app.get('/api/health', (req, res) => {
