@@ -33,11 +33,11 @@ const TestimonialsSection = () => {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-emerald-50 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <div className="flex mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+                  <Star key={i} className="w-5 h-5 text-emerald-400 fill-current" />
                 ))}
               </div>
               <p className="text-gray-700 mb-6 italic">"{testimonial.content}"</p>

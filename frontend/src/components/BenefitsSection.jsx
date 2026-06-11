@@ -37,7 +37,7 @@ const BenefitsSection = () => {
               key={index}
               className="flex items-start space-x-4 p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-xl flex-shrink-0">
+              <div className="bg-emerald-500 text-white p-3 rounded-xl flex-shrink-0">
                 {benefit.icon}
               </div>
               <div>
