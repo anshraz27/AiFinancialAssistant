@@ -19,9 +19,9 @@ const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [error, setError] = useState(""); // ✅ NEW: Error state
+  const [error, setError] = useState(""); // âœ… NEW: Error state
 
-  // ✅ Fetch transactions from backend on mount
+  // âœ… Fetch transactions from backend on mount
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -90,7 +90,7 @@ const TransactionsPage = () => {
             </button>
             <button
               onClick={() => navigate("/add-expense")}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2"
+              className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 transition-all duration-200 flex items-center space-x-2"
             >
               <Plus className="w-4 h-4" />
               <span>Add Transaction</span>
@@ -113,11 +113,11 @@ const TransactionsPage = () => {
                 <p className="text-sm font-medium text-gray-600">
                   Total Income
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-2xl font-bold text-emerald-600">
                   ${totalIncome.toLocaleString()}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <ArrowUpRight className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -145,7 +145,7 @@ const TransactionsPage = () => {
                 <p className="text-sm font-medium text-gray-600">Net Amount</p>
                 <p
                   className={`text-2xl font-bold ${
-                    netAmount >= 0 ? "text-green-600" : "text-red-600"
+                    netAmount >= 0 ? "text-emerald-600" : "text-red-600"
                   }`}
                 >
                   {netAmount >= 0 ? "+" : "-"}$
@@ -155,7 +155,7 @@ const TransactionsPage = () => {
               <div
                 className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                   netAmount >= 0
-                    ? "bg-gradient-to-r from-green-400 to-green-600"
+                    ? "bg-emerald-500"
                     : "bg-gradient-to-r from-red-400 to-red-600"
                 }`}
               >
@@ -180,7 +180,7 @@ const TransactionsPage = () => {
                   placeholder="Search transactions..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
                 />
               </div>
             </div>
@@ -188,7 +188,7 @@ const TransactionsPage = () => {
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
               >
                 <option value="all">All Transactions</option>
                 <option value="income">Income Only</option>
@@ -221,7 +221,7 @@ const TransactionsPage = () => {
                       <div
                         className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                           transaction.type === "income"
-                            ? "bg-green-100 text-green-600"
+                            ? "bg-emerald-100 text-emerald-600"
                             : "bg-red-100 text-red-600"
                         }`}
                       >
@@ -239,11 +239,11 @@ const TransactionsPage = () => {
                           <span>
                             {transaction.category?.name || "Uncategorized"}
                           </span>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span>
                             {new Date(transaction.date).toLocaleDateString()}
                           </span>
-                          <span>•</span>
+                          <span>â€¢</span>
                           <span className="capitalize">
                             {transaction.paymentMethod}
                           </span>
@@ -254,7 +254,7 @@ const TransactionsPage = () => {
                       <div
                         className={`text-xl font-bold ${
                           transaction.type === "income"
-                            ? "text-green-600"
+                            ? "text-emerald-600"
                             : "text-red-600"
                         }`}
                       >

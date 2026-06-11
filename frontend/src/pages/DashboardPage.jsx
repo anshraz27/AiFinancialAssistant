@@ -97,13 +97,13 @@ const DashboardPage = () => {
                 <p className="text-sm font-medium text-gray-600">Total Balance</p>
                 <p className="text-2xl font-bold text-gray-900">${financialData.totalBalance.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-white" />
               </div>
             </div>
             <div className="flex items-center mt-4 text-sm">
-              <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-500 font-medium"></span>
+              <TrendingUp className="w-4 h-4 text-emerald-500 mr-1" />
+              <span className="text-emerald-500 font-medium"></span>
               <span className="text-gray-500 ml-1"></span>
             </div>
           </div>
@@ -114,13 +114,13 @@ const DashboardPage = () => {
                 <p className="text-sm font-medium text-gray-600">Monthly Income</p>
                 <p className="text-2xl font-bold text-gray-900">${financialData.monthlyIncome.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <ArrowUpRight className="w-6 h-6 text-white" />
               </div>
             </div>
             <div className="flex items-center mt-4 text-sm">
-              <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-              <span className="text-green-500 font-medium"></span>
+              <TrendingUp className="w-4 h-4 text-emerald-500 mr-1" />
+              <span className="text-emerald-500 font-medium"></span>
               <span className="text-gray-500 ml-1"></span>
             </div>
           </div>
@@ -148,7 +148,7 @@ const DashboardPage = () => {
                 <p className="text-sm font-medium text-gray-600">Savings</p>
                 <p className="text-2xl font-bold text-gray-900">${financialData.savings.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <PieChart className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -159,7 +159,7 @@ const DashboardPage = () => {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
-                  className="bg-gradient-to-r from-purple-400 to-purple-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${savingsProgress}%` }}
                 ></div>
               </div>
@@ -174,7 +174,7 @@ const DashboardPage = () => {
               <h2 className="text-xl font-bold text-gray-900">Recent Transactions</h2>
               <button
                 onClick={() => navigate("/transactions")}
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                className="text-emerald-600 hover:text-emerald-700 font-medium text-sm"
               >
                 View All
               </button>
@@ -188,7 +188,7 @@ const DashboardPage = () => {
                   <div className="flex items-center space-x-4">
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        transaction.type === "income" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+                        transaction.type === "income" ? "bg-emerald-100 text-emerald-600" : "bg-red-100 text-red-600"
                       }`}
                     >
                       {transaction.type === "income" ? (
@@ -200,11 +200,11 @@ const DashboardPage = () => {
                     <div>
                       <p className="font-medium text-gray-900">{transaction.description}</p>
                       <p className="text-sm text-gray-500">
-                        {transaction.category} • {transaction.date}
+                        {transaction.category} â€¢ {transaction.date}
                       </p>
                     </div>
                   </div>
-                  <div className={`font-bold ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
+                  <div className={`font-bold ${transaction.type === "income" ? "text-emerald-600" : "text-red-600"}`}>
                     {transaction.type === "income" ? "+" : "-"}${transaction.amount.toLocaleString()}
                   </div>
                 </div>
@@ -218,7 +218,7 @@ const DashboardPage = () => {
               <h2 className="text-xl font-bold text-gray-900">Budget Overview</h2>
               <button
               onClick={() => navigate("/budget")}
-                 className="text-blue-600 hover:text-blue-700 font-medium text-sm">Manage</button>
+                 className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">Manage</button>
             </div>
             <div className="space-y-4">
               {currentBudget.length > 0 ? (
@@ -228,7 +228,7 @@ const DashboardPage = () => {
                     className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl transition-colors"
                   >
                     <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center">
+                      <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
                         <PieChart className="w-5 h-5" />
                       </div>
                       <div>
@@ -238,7 +238,7 @@ const DashboardPage = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="text-sm text-purple-600">
+                    <div className="text-sm text-emerald-600">
                       {Math.round((budget.spent / budget.amount) * 100)}%
                     </div>
                   </div>
@@ -256,9 +256,9 @@ const DashboardPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <button
               onClick={handleAddIncome}
-              className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 group"
+              className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 group"
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <Plus className="w-6 h-6 text-white" />
               </div>
               <span className="font-medium text-gray-900">Add Income</span>
@@ -276,9 +276,9 @@ const DashboardPage = () => {
 
             <button
               onClick={handleSetBudget}
-              className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 transition-all duration-200 group"
+              className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 group"
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <PieChart className="w-6 h-6 text-white" />
               </div>
               <span className="font-medium text-gray-900">Set Budget</span>
@@ -286,9 +286,9 @@ const DashboardPage = () => {
 
             <button
               onClick={handleViewReports}
-              className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200 group"
+              className="flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 group"
             >
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <span className="font-medium text-gray-900">View Reports</span>

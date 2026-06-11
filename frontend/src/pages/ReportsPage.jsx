@@ -88,7 +88,7 @@ const ReportsPage = () => {
               type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
             />
             <button
               onClick={handleExport}
@@ -104,7 +104,7 @@ const ReportsPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-2xl shadow-lg">
             <p className="text-sm text-gray-600">Total Income</p>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-2xl font-bold text-emerald-600">
               ${reportData.totalIncome.toLocaleString()}
             </p>
           </div>
@@ -116,7 +116,7 @@ const ReportsPage = () => {
           </div>
           <div className="bg-white p-6 rounded-2xl shadow-lg">
             <p className="text-sm text-gray-600">Investments</p>
-            <p className="text-2xl font-bold text-purple-600">
+            <p className="text-2xl font-bold text-emerald-600">
               ${reportData.totalInvestments.toLocaleString()}
             </p>
           </div>
@@ -124,7 +124,7 @@ const ReportsPage = () => {
             <p className="text-sm text-gray-600">Net Savings</p>
             <p
               className={`text-2xl font-bold ${
-                reportData.netSavings >= 0 ? "text-green-600" : "text-red-600"
+                reportData.netSavings >= 0 ? "text-emerald-600" : "text-red-600"
               }`}
             >
               ${reportData.netSavings.toLocaleString()}

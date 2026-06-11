@@ -31,7 +31,7 @@ const BudgetPage = () => {
     defaultValues: {
       category: "",
       budget: "",
-      color: "bg-indigo-500",
+      color: "bg-emerald-500",
     },
   });
 
@@ -81,8 +81,8 @@ const BudgetPage = () => {
   const getStatusColor = (spent, budget) => {
     const percentage = (spent / budget) * 100;
     if (percentage >= 90) return "text-red-600";
-    if (percentage >= 75) return "text-yellow-600";
-    return "text-green-600";
+    if (percentage >= 75) return "text-emerald-600";
+    return "text-emerald-600";
   };
 
   const getStatusIcon = (spent, budget) => {
@@ -108,7 +108,7 @@ const BudgetPage = () => {
           </div>
           <button
             onClick={() => setShowAddBudget(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2"
+            className="bg-emerald-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-600 transition-all duration-200 flex items-center space-x-2"
           >
             <Plus className="w-5 h-5" />
             <span>Add Budget</span>
@@ -127,7 +127,7 @@ const BudgetPage = () => {
                   ${totalBudget.toLocaleString()}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <Target className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -162,7 +162,7 @@ const BudgetPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Remaining</p>
                 <p
-                  className={`text-2xl font-bold ${remainingBudget >= 0 ? "text-green-600" : "text-red-600"}`}
+                  className={`text-2xl font-bold ${remainingBudget >= 0 ? "text-emerald-600" : "text-red-600"}`}
                 >
                   ${Math.abs(remainingBudget).toLocaleString()}
                 </p>
@@ -170,7 +170,7 @@ const BudgetPage = () => {
               <div
                 className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                   remainingBudget >= 0
-                    ? "bg-gradient-to-r from-green-400 to-green-600"
+                    ? "bg-emerald-500"
                     : "bg-gradient-to-r from-red-400 to-red-600"
                 }`}
               >
@@ -205,7 +205,7 @@ const BudgetPage = () => {
                       </h3>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                      <button className="p-2 text-gray-400 hover:text-emerald-600 transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>
                       <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
@@ -230,7 +230,7 @@ const BudgetPage = () => {
                     <div>
                       <p className="text-sm text-gray-500">Remaining</p>
                       <p
-                        className={`font-semibold ${remaining >= 0 ? "text-green-600" : "text-red-600"}`}
+                        className={`font-semibold ${remaining >= 0 ? "text-emerald-600" : "text-red-600"}`}
                       >
                         ${Math.abs(remaining).toLocaleString()}
                       </p>
@@ -286,7 +286,7 @@ const BudgetPage = () => {
                     {...register("category", {
                       required: "Category is required",
                     })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
                     placeholder="e.g., Groceries"
                   />
                   {errors.category && (
@@ -309,7 +309,7 @@ const BudgetPage = () => {
                       {...register("budget", {
                         required: "Budget amount is required",
                       })}
-                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
                       placeholder="0.00"
                     />
                   </div>
@@ -326,14 +326,9 @@ const BudgetPage = () => {
                   </label>
                   <select
                     {...register("color")}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
                   >
-                    <option value="bg-indigo-500">Indigo</option>
-                    <option value="bg-red-500">Red</option>
-                    <option value="bg-green-500">Green</option>
-                    <option value="bg-yellow-500">Yellow</option>
-                    <option value="bg-blue-500">Blue</option>
-                    <option value="bg-purple-500">Purple</option>
+                    <option value="bg-emerald-500">Emerald</option>
                   </select>
                 </div>
                 {serverError && (
@@ -356,7 +351,7 @@ const BudgetPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50"
                   >
                     {isLoading ? "Adding..." : "Add Budget"}
                   </button>

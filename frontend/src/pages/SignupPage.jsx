@@ -142,7 +142,7 @@ const SignupPage = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
+          className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2 rounded"
         >
           {loading ? "Signing up..." : "Sign Up"}
         </button>

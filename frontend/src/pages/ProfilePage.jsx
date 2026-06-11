@@ -65,7 +65,7 @@ const ProfilePage = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-12">
+          <div className="bg-emerald-500 px-8 py-12">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">
                 <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
@@ -75,12 +75,12 @@ const ProfilePage = () => {
                   <h1 className="text-3xl font-bold">
                     {profileData.firstName} {profileData.lastName}
                   </h1>
-                  <p className="text-blue-100 mt-1">{profileData.occupation}</p>
+                  <p className="text-emerald-100 mt-1">{profileData.occupation}</p>
                 </div>
               </div>
               <button
                 onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-                className="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-blue-50 transition-colors flex items-center space-x-2"
+                className="bg-white text-emerald-600 px-6 py-3 rounded-lg font-medium hover:bg-emerald-50 transition-colors flex items-center space-x-2"
               >
                 {isEditing ? <Save className="w-5 h-5" /> : <Edit className="w-5 h-5" />}
                 <span>{isEditing ? "Save Changes" : "Edit Profile"}</span>
@@ -104,7 +104,7 @@ const ProfilePage = () => {
                       value={profileData.firstName}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                     />
                   </div>
                   <div>
@@ -115,7 +115,7 @@ const ProfilePage = () => {
                       value={profileData.lastName}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                     />
                   </div>
                 </div>
@@ -131,7 +131,7 @@ const ProfilePage = () => {
                     value={profileData.email}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                   />
                 </div>
 
@@ -146,7 +146,7 @@ const ProfilePage = () => {
                     value={profileData.phone}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                   />
                 </div>
 
@@ -161,7 +161,7 @@ const ProfilePage = () => {
                     value={profileData.dateOfBirth}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                   />
                 </div>
               </div>
@@ -181,7 +181,7 @@ const ProfilePage = () => {
                     onChange={handleChange}
                     disabled={!isEditing}
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                   />
                 </div>
 
@@ -193,7 +193,7 @@ const ProfilePage = () => {
                     value={profileData.occupation}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                   />
                 </div>
 
@@ -207,7 +207,7 @@ const ProfilePage = () => {
                       value={profileData.annualIncome}
                       onChange={handleChange}
                       disabled={!isEditing}
-                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 disabled:bg-gray-50 disabled:text-gray-500"
                     />
                   </div>
                 </div>
@@ -223,7 +223,7 @@ const ProfilePage = () => {
                     </button>
                     <button
                       onClick={handleSave}
-                      className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2"
+                      className="flex-1 px-6 py-3 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-600 transition-all duration-200 flex items-center justify-center space-x-2"
                     >
                       <Save className="w-5 h-5" />
                       <span>Save Changes</span>

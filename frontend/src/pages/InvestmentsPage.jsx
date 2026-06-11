@@ -50,7 +50,7 @@ const InvestmentsPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="w-12 h-12 animate-spin text-blue-600" />
+        <Loader2 className="w-12 h-12 animate-spin text-emerald-600" />
       </div>
     )
   }
@@ -67,7 +67,7 @@ const InvestmentsPage = () => {
             <p className="text-gray-600 mt-2">Track your investments and portfolio performance.</p>
           </div>
           <button onClick={() => navigate("/add-investment")}
-          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2">
+          className="bg-emerald-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-600 transition-all duration-200 flex items-center space-x-2">
             <Plus className="w-5 h-5" />
             <span>Add Investment</span>
           </button>
@@ -81,7 +81,7 @@ const InvestmentsPage = () => {
                 <p className="text-sm font-medium text-gray-600">Total Value</p>
                 <p className="text-2xl font-bold text-gray-900">${totalValue.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -103,14 +103,14 @@ const InvestmentsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Gain/Loss</p>
-                <p className={`text-2xl font-bold ${totalGainLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
+                <p className={`text-2xl font-bold ${totalGainLoss >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                   {totalGainLoss >= 0 ? "+" : ""}${totalGainLoss.toLocaleString()}
                 </p>
               </div>
               <div
                 className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                   totalGainLoss >= 0
-                    ? "bg-gradient-to-r from-green-400 to-green-600"
+                    ? "bg-emerald-500"
                     : "bg-gradient-to-r from-red-400 to-red-600"
                 }`}
               >
@@ -122,7 +122,7 @@ const InvestmentsPage = () => {
               </div>
             </div>
             <div className="flex items-center mt-2 text-sm">
-              <span className={`font-medium ${totalGainLoss >= 0 ? "text-green-600" : "text-red-600"}`}>
+              <span className={`font-medium ${totalGainLoss >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                 {totalGainLoss >= 0 ? "+" : ""}
                 {totalGainLossPercent.toFixed(2)}%
               </span>
@@ -135,7 +135,7 @@ const InvestmentsPage = () => {
                 <p className="text-sm font-medium text-gray-600">Holdings</p>
                 <p className="text-2xl font-bold text-gray-900">{investmentCount}</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
                 <PieChart className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -200,13 +200,13 @@ const InvestmentsPage = () => {
                         ${currentValue.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <span className={gainLoss >= 0 ? "text-green-600" : "text-red-600"}>
+                        <span className={gainLoss >= 0 ? "text-emerald-600" : "text-red-600"}>
                           {gainLoss >= 0 ? "+" : ""}${gainLoss.toFixed(2)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div
-                          className={`flex items-center ${gainLossPercent >= 0 ? "text-green-600" : "text-red-600"}`}
+                          className={`flex items-center ${gainLossPercent >= 0 ? "text-emerald-600" : "text-red-600"}`}
                         >
                           {gainLossPercent >= 0 ? (
                             <TrendingUp className="w-4 h-4 mr-1" />
