@@ -1,7 +1,7 @@
 // src/pages/SignupPage.jsx
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import API from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 const SignupPage = () => {
@@ -30,7 +30,7 @@ const SignupPage = () => {
         marketingEmails: data.marketingEmails || false,
       };
 
-      await axios.post("http://localhost:5000/api/auth/signup", payload, {
+      await API.post("/auth/signup", payload, {
         withCredentials: true,
       });
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
-import axios from "axios";
+import API from "../../services/api";
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -32,7 +32,7 @@ const TransactionsPage = () => {
           return;
         }
 
-        const res = await axios.get("http://localhost:5000/api/transactions", {
+        const res = await API.get("/transactions", {
           headers: {
             Authorization: `Bearer ${token}`, 
           },

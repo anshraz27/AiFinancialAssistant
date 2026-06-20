@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import API from "../../services/api";
 import { Link } from "react-router-dom";
 import { DollarSign, Eye, EyeOff } from "lucide-react";
 
@@ -34,8 +34,8 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+      const response = await API.post(
+        "/auth/login",
         data
       );
 

@@ -1,7 +1,9 @@
 const JWT = require('jsonwebtoken')
 require("dotenv").config();
 const secret = process.env.JWT_SECRET;
-
+if (!secret) {
+  throw new Error("JWT_SECRET is missing");
+}
 function createTokenForUser(user){
     const payload = {
         id: user._id,
