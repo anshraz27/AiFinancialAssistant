@@ -174,8 +174,8 @@ Edit `backend/.env` before starting the server:
 ```env
 NODE_ENV=development
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/finscope
-REDIS_URL=redis://localhost:6379
+MONGODB_URI=your_mongodb_url
+REDIS_URL=your_redis_url
 JWT_SECRET=replace_with_a_long_random_secret
 FRONTEND_URL=http://localhost:5173
 EMAIL_SERVICE=gmail
