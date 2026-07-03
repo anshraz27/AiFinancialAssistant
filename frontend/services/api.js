@@ -1,7 +1,9 @@
 import axios from "axios";
 
+// In production (Vercel), VITE_API_URL points to the Render backend (e.g. https://finscope-api.onrender.com/api)
+// In local dev, falls back to localhost via Vite proxy
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_API_URL || "/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,19 +15,14 @@ API.interceptors.request.use(
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("API Request - Token added:", token.substring(0, 20) + "...");
-    } else {
-      console.log("API Request - No token found");
     }
-    
-    console.log("API Request - Headers:", config.headers);
-    
+
     // Ensure Authorization header is preserved even when Content-Type is set
     if (config.headers["Content-Type"] && config.headers["Content-Type"].includes("multipart/form-data")) {
       // For FormData, don't set Content-Type manually, let the browser set it with boundary
       delete config.headers["Content-Type"];
     }
-    
+
     return config;
   },
   (error) => {
@@ -35,15 +32,11 @@ API.interceptors.request.use(
 
 // Add response interceptor to handle auth errors
 API.interceptors.response.use(
-  (response) => {
-    console.log("API Response - Success:", response.status);
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.log("API Response - Error:", error.response?.status, error.response?.data);
     if (error.response?.status === 401) {
       // Don't automatically redirect, let components handle it
-      console.log("Authentication error - token may be expired");
+      console.warn("Authentication error - token may be expired");
     }
     return Promise.reject(error);
   }
