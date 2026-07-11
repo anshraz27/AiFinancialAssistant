@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const HeroSection = () => {
   return (
     <section className="relative overflow-hidden bg-emerald-50">
@@ -20,12 +22,12 @@ const HeroSection = () => {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-emerald-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-600 transition-all duration-200 transform hover:scale-105 shadow-lg">
+              <Link to="/login" className="bg-emerald-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-600 transition-all duration-200 transform hover:scale-105 shadow-lg text-center">
                 Get Started Free
-              </button>
-              <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200">
+              </Link>
+              <Link to="/login" className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 text-center">
                 View Dashboard
-              </button>
+              </Link>
             </div>
           </div>
           <div className="relative">
