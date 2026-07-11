@@ -47,6 +47,44 @@ const transactionSchema = new mongoose.Schema({
   recurringFrequency: {
     type: String,
     enum: ['weekly', 'monthly', 'yearly']
+  },
+  // --- Receipt scan fields (all optional, existing data unaffected) ---
+  merchant: {
+    type: String,
+    default: null
+  },
+  currency: {
+    type: String,
+    default: null
+  },
+  subtotal: {
+    type: Number,
+    default: null
+  },
+  tax: {
+    type: Number,
+    default: null
+  },
+  items: [{
+    name: { type: String, default: 'Unknown Item' },
+    quantity: { type: Number, default: 1 },
+    price: { type: Number, default: 0 }
+  }],
+  confidence: {
+    type: Number,
+    min: 0,
+    max: 1,
+    default: null
+  },
+  source: {
+    type: String,
+    enum: ['manual', 'receipt_scan'],
+    default: 'manual'
+  },
+  status: {
+    type: String,
+    enum: ['confirmed', 'pending_review'],
+    default: 'confirmed'
   }
 }, {
   timestamps: true
