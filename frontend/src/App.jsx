@@ -18,6 +18,7 @@ import TransactionsPage from "./pages/TransactionsPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
 import AddInvestmentPage from "./pages/AddInvestmentPage";
+import ReceiptScanPage from "./pages/ReceiptScanPage";
 
 function App() {
   return (
@@ -105,6 +106,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <SettingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scan-receipt"
+            element={
+              <ProtectedRoute>
+                <ReceiptScanPage />
               </ProtectedRoute>
             }
           />

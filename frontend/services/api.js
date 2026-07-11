@@ -51,5 +51,14 @@ export const deleteInvestment = (id) => API.delete(`/investments/${id}`);
 export const getPortfolioSummary = () => API.get("/investments/summary/portfolio");
 export const getAllocationByType = () => API.get("/investments/summary/allocation");
 
+// Receipt Scanner API methods
+export const scanReceipt = (formData, onUploadProgress) =>
+  API.post("/receipts/scan", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    onUploadProgress,
+  });
+export const confirmReceipt = (id, data) =>
+  API.put(`/receipts/${id}/confirm`, data);
+
 
 export default API;

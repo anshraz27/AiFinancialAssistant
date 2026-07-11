@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
-import { DollarSign, Home, Plus, TrendingUp, PieChart, Settings, User, LogOut, Menu, X } from "lucide-react"
+import { DollarSign, Home, Plus, TrendingUp, PieChart, Settings, User, LogOut, Menu, X, Camera } from "lucide-react"
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -20,6 +20,7 @@ const Navbar = () => {
     { path: "/dashboard", icon: Home, label: "Dashboard" },
     { path: "/add-expense", icon: Plus, label: "Add Expense" },
     { path: "/add-income", icon: TrendingUp, label: "Add Income" },
+    { path: "/scan-receipt", icon: Camera, label: "Scan Receipt" },
     { path: "/budget", icon: PieChart, label: "Budget" },
     { path: "/investments", icon: TrendingUp, label: "Investments" },
   ]
