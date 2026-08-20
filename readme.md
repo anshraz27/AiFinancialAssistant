@@ -27,6 +27,7 @@ FinScope is a full-stack personal finance application for tracking income, expen
 - Email notifications and budget alerts
 - Receipt scanning and transaction data extraction
 - MongoDB persistence and Redis caching
+- Event-driven background receipt/report processing with BullMQ, SSE job updates, and GraphQL dashboard analytics
 
 ## Tech stack
 
@@ -210,6 +211,12 @@ Open http://localhost:5173. Vite proxies `/api` requests to the backend at `http
 | `EMAIL_SERVICE` | For email | Nodemailer email provider, such as `gmail` |
 | `EMAIL_USER` | For email | Sender email account |
 | `EMAIL_PASS` | For email | Email app password or provider credential |
+
+## Scaling architecture
+
+The API remains the REST CRUD entry point. Receipt scans and report preparation are queued in BullMQ and processed by the `worker` Compose service. Poll `GET /api/jobs/:queue/:id` until the frontend is subscribed to `GET /api/events/stream?token=<jwt>` (SSE). GraphQL dashboard reads are available at `POST /api/graphql` with the normal bearer token; CRUD remains REST.
+
+Run workers locally with `npm run worker` from `backend`. Receipt object URLs must be readable by the configured vision provider; use presigned URLs when the S3 bucket is private.
 
 For Gmail, use an app password rather than your normal account password. Never commit `backend/.env` or other real secrets.
 

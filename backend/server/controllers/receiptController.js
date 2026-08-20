@@ -17,10 +17,8 @@
  */
 
 const { uploadReceiptImage } = require('../services/s3.service');
-const { analyzeDocument } = require('../services/ai.service');
-const { validateAIExpenseOutput } = require('../validators/expense.validator');
-const { normalizeExpense } = require('../utils/normalizeExpense');
-const { createExpense, confirmExpense } = require('../services/expense.service');
+const { confirmExpense } = require('../services/expense.service');
+const { addReceiptScan } = require('../jobs/receiptQueue');
 
 /**
  * POST /api/receipts/scan
@@ -56,63 +54,25 @@ const scanReceipt = async (req, res) => {
       });
     }
 
-    // Step 3: Call the Vision Language Model to analyze the receipt
-    // Send the raw image buffer as base64 (VLM can't access private S3 URLs)
-    let aiResult;
+    // The file is now durable in object storage; queue only metadata, not the image buffer.
+    let job;
     try {
-      aiResult = await analyzeDocument({
-        imageBuffer: req.file.buffer,
+      job = await addReceiptScan({
+        userId: userId.toString(),
+        receiptImageUrl,
         mimeType: req.file.mimetype,
-        documentType: 'receipt',
       });
-    } catch (aiError) {
-      console.error('AI analysis failed:', aiError.message);
-      return res.status(502).json({
+    } catch (queueError) {
+      console.error('Receipt queue failed:', queueError.message);
+      return res.status(503).json({
         success: false,
-        message: aiError.message || 'AI analysis failed. Please try again.',
+        message: 'Receipt processing is temporarily unavailable. Please try again.',
       });
     }
-
-    // Step 4: Validate AI output against the Transaction DB schema
-    const validation = validateAIExpenseOutput(aiResult);
-
-    if (!validation.success) {
-      console.error('AI output validation failed:', validation.errors);
-      return res.status(422).json({
-        success: false,
-        message: 'AI returned invalid data. The receipt may be unclear.',
-        errors: validation.errors,
-      });
-    }
-
-    // Step 5: Check that we got a usable amount
-    if (!validation.data.amount || validation.data.amount <= 0) {
-      return res.status(422).json({
-        success: false,
-        message: 'Could not extract a valid amount from the receipt. Please enter the expense manually.',
-      });
-    }
-
-    // Step 6: Normalize the validated data
-    const normalizedData = normalizeExpense(validation.data);
-
-    // Step 7: Save as a draft expense in MongoDB
-    let expense;
-    try {
-      expense = await createExpense(normalizedData, userId, receiptImageUrl);
-    } catch (dbError) {
-      console.error('MongoDB save failed:', dbError.message);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to save expense. Please try again.',
-      });
-    }
-
-    // Step 8: Return the expense for frontend review
-    return res.status(201).json({
+    return res.status(202).json({
       success: true,
-      message: 'Receipt scanned successfully. Please review and confirm.',
-      expense,
+      message: 'Receipt scan queued. Check the job status for the draft expense.',
+      jobId: job.id,
     });
   } catch (error) {
     console.error('Receipt scan error:', error);

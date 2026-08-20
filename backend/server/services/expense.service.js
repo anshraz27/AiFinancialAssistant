@@ -7,6 +7,9 @@
  */
 
 const Transaction = require('../models/Transaction');
+const { emit } = require('../events/domainEvents');
+const events = require('../events/eventTypes');
+const { checkBudgetAlert } = require('./budgetAlert.service');
 
 /**
  * Create a new expense from receipt scan data.
@@ -90,6 +93,8 @@ const confirmExpense = async (expenseId, userId, updates = {}) => {
   expense.status = 'confirmed';
 
   await expense.save();
+  emit(events.TRANSACTION_CREATED, { userId: userId.toString(), transactionId: expense.id, type: 'expense', category: expense.category, amount: expense.amount });
+  await checkBudgetAlert({ userId, category: expense.category });
   return expense;
 };
 
