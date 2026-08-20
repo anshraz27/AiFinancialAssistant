@@ -1,6 +1,7 @@
 const Transaction = require("../models/Transaction");
 const Investment = require("../models/Investment");
 const PDFDocument = require("pdfkit");
+const { addReportGeneration } = require('../jobs/reportQueue');
 
 const getMonthlyReport = async (req, res) => {
   // ... (your existing code, unchanged)
@@ -83,8 +84,17 @@ const generateMonthlyReport = async (req, res) => {
   }
 };
 
+const queueMonthlyReport = async (req, res, next) => {
+  try {
+    const { month } = req.body;
+    if (!/^\d{4}-\d{2}$/.test(month || '')) return res.status(400).json({ message: 'Month must use YYYY-MM format.' });
+    const job = await addReportGeneration({ userId: req.user._id.toString(), month });
+    return res.status(202).json({ message: 'Report generation queued.', jobId: job.id });
+  } catch (error) { next(error); }
+};
+
 function pickCategoryColor(category) {
   // same as yours
 }
 
-module.exports = { getMonthlyReport, generateMonthlyReport };
+module.exports = { getMonthlyReport, generateMonthlyReport, queueMonthlyReport };

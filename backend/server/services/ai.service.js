@@ -45,15 +45,15 @@ const getClient = () => {
  * @returns {Object} Parsed JSON object with extracted financial data
  * @throws {Error} On AI timeout, invalid response, or API errors
  */
-const analyzeDocument = async ({ imageBuffer, mimeType, documentType = 'receipt' }) => {
+const analyzeDocument = async ({ imageBuffer, imageUrl, mimeType, documentType = 'receipt' }) => {
   try {
     const modelName = process.env.HF_MODEL_NAME || 'Qwen/Qwen2.5-VL-72B-Instruct';
     const systemPrompt = buildSystemPrompt(documentType);
     const userPrompt = buildUserPrompt(documentType);
 
     // Convert image buffer to base64 data URL for inline embedding
-    const base64Image = imageBuffer.toString('base64');
-    const dataUrl = `data:${mimeType};base64,${base64Image}`;
+    if (!imageBuffer && !imageUrl) throw new Error('Receipt image data is required.');
+    const dataUrl = imageUrl || `data:${mimeType};base64,${imageBuffer.toString('base64')}`;
 
     const response = await getClient().chat.completions.create({
       model: modelName,
