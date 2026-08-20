@@ -17,9 +17,17 @@ const errorHandler = require('./middleware/errorHandler');
 const dashboardRoute= require('./routes/dashboardRoute');
 const reportRoute = require('./routes/reportRoute');
 const receiptRoutes = require('./routes/receiptRoute');
+const jobRoutes = require('./routes/jobRoute');
+const eventRoutes = require('./routes/eventRoute');
+const { graphqlHTTP } = require('express-graphql');
+const graphqlSchema = require('./graphql/schema');
+const graphqlRoot = require('./graphql/resolvers');
+const { protect } = require('./middleware/authMiddleware');
+const { startEventSubscriber } = require('./events/domainEvents');
 
 
 const app = express();
+startEventSubscriber().catch((error) => console.error('Domain event subscriber unavailable:', error.message));
 app.use(cors({
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true,
@@ -49,6 +57,9 @@ app.use('/api/investments', investmentRoutes);
 app.use('/api/dashboard',dashboardRoute);
 app.use('/api/reports',reportRoute);
 app.use('/api/receipts', receiptRoutes);
+app.use('/api/jobs', jobRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/graphql', protect, graphqlHTTP((req) => ({ schema: graphqlSchema, rootValue: graphqlRoot, context: { user: req.user }, graphiql: process.env.NODE_ENV !== 'production' })));
 
 // Health check
 app.get('/api/health', (req, res) => {
