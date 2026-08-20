@@ -1,34 +1,8 @@
 const Transaction = require("../models/Transaction");
-const Budget = require("../models/Budget");
-const User = require("../models/User");
 const { validationResult } = require("express-validator");
-const { sendBudgetAlertEmail } = require("../utils/emailService");
-
-// Check for budget threshold alerts for expenses
-const checkBudgetAlert = async (userId, category, amount) => {
-  try {
-    const budget = await Budget.findOne({ userId, category });
-    if (!budget) return;
-
-    const newSpent = budget.spent + amount;
-    const alertThreshold = budget.amount * 0.9;
-    const previousSpent = budget.spent;
-
-    if (newSpent >= alertThreshold && previousSpent < alertThreshold) {
-      const user = await User.findById(userId);
-      if (user && user.email) {
-        await sendBudgetAlertEmail(
-          user.email,
-          category,
-          newSpent,
-          budget.amount
-        );
-      }
-    }
-  } catch (error) {
-    console.error('Error checking budget alert:', error);
-  }
-};
+const { checkBudgetAlert } = require('../services/budgetAlert.service');
+const { emit } = require('../events/domainEvents');
+const events = require('../events/eventTypes');
 
 const AddTransaction = async (req, res) => {
   try {
@@ -67,10 +41,8 @@ const AddTransaction = async (req, res) => {
 
     await transaction.save();
 
-    // Check for budget alert if it's an expense
-    if (type === 'expense') {
-      await checkBudgetAlert(user, category, amount);
-    }
+    emit(events.TRANSACTION_CREATED, { userId: user.toString(), transactionId: transaction.id, type, category, amount });
+    if (type === 'expense') await checkBudgetAlert({ userId: user, category });
 
     res.status(201).json({
       message: "Transaction added successfully",
