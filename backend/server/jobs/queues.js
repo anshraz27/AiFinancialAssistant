@@ -5,5 +5,6 @@ const queueOptions = { connection, defaultJobOptions: { attempts: 3, backoff: { 
 
 const receiptQueue = new Queue('receipt.scan', queueOptions);
 const reportQueue = new Queue('report.generate', queueOptions);
+const budgetAlertQueue = new Queue('budget.alert', queueOptions);
 
-module.exports = { connection, receiptQueue, reportQueue };
+module.exports = { connection, receiptQueue, reportQueue, budgetAlertQueue };

@@ -1,6 +1,7 @@
 const Budget = require("../models/Budget");
 const { validationResult } = require("express-validator");
 const { AppError } = require("../middleware/errorHandler");
+const { checkBudgetAlert } = require("../services/budgetAlert.service");
 
 const AddBudget = async (req, res) => {
   try {
@@ -26,6 +27,7 @@ const AddBudget = async (req, res) => {
       endDate,
     });
     await budget.save();
+    await checkBudgetAlert({ userId, category });
 
     res.status(201).json({
       message: "Budget Created Successfully",
@@ -47,12 +49,15 @@ const UpdateBudget = async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    const updatedBudget = await Budget.findByIdAndUpdate(id, updateData, {
-      new: true,
-    });
+    const updatedBudget = await Budget.findOneAndUpdate(
+      { _id: id, userId: req.user._id },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
     if (!updatedBudget) {
       return res.status(404).json({ message: "Budget not found" });
     }
+    await checkBudgetAlert({ userId: req.user._id, category: updatedBudget.category });
 
     res.json({ message: "Budget updated successfully", budget: updatedBudget });
   } catch (error) {
@@ -69,7 +74,7 @@ const DeleteBudget = async (req, res) => {
     }
     const { id } = req.params; // assuming you pass :id in the route
 
-    const del = await Budget.findByIdAndDelete(id);
+    const del = await Budget.findOneAndDelete({ _id: id, userId: req.user._id });
     if (!del) {
       return res.status(404).json({ message: "Budget not found" });
     }
@@ -86,9 +91,7 @@ const GetAllBudget = async(req,res) => {
       return res.status(400).json({ errors: errors.array() });
     }
     const userId = req.user._id; // Get user ID from middleware
-    const budgets = await Budget.find({ userId }).sort({
-          date: -1,
-        });
+    const budgets = await Budget.find({ userId }).sort({ createdAt: -1 });
     
     res.json({
       message: "Budgets fetched successfully",

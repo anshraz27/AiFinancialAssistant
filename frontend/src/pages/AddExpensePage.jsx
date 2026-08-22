@@ -5,19 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Navbar from "../components/Navbar";
 import API from "../../services/api";
-
-const expenseCategories = [
-  "Food",
-  "Transport",
-  "Shopping",
-  "Bills",
-  "Health",
-  "Entertainment",
-  "Education",
-  "Travel",
-  "Rent",
-  "Other",
-];
+import { expenseCategories } from "../constants/expenseCategories";
 
 const AddExpensePage = () => {
   const navigate = useNavigate();

@@ -14,12 +14,14 @@ import {
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import API from "../../services/api";
+import { expenseCategories } from "../constants/expenseCategories";
 
 const BudgetPage = () => {
   const [budgets, setBudgets] = useState([]);
   const [showAddBudget, setShowAddBudget] = useState(false);
   const [serverError, setServerError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [editingBudget, setEditingBudget] = useState(null);
 
   // useForm for add budget modal
   const {
@@ -41,7 +43,7 @@ const BudgetPage = () => {
       try {
         const res = await API.get("/budgets");
         setBudgets(res.data.budgets || []);
-      } catch (err) {
+      } catch {
         setServerError("Failed to load budgets.");
       }
     };
@@ -67,14 +69,49 @@ const BudgetPage = () => {
         startDate: new Date(),
         endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
       };
-      const res = await API.post("/budgets", payload);
-      setBudgets([...budgets, res.data.budget || res.data]);
+      const res = editingBudget
+        ? await API.put(`/budgets/${editingBudget._id || editingBudget.id}`, payload)
+        : await API.post("/budgets", payload);
+      const savedBudget = res.data.budget || res.data;
+      setBudgets((currentBudgets) =>
+        editingBudget
+          ? currentBudgets.map((budget) =>
+              (budget._id || budget.id) === (editingBudget._id || editingBudget.id)
+                ? savedBudget
+                : budget
+            )
+          : [...currentBudgets, savedBudget]
+      );
       reset();
       setShowAddBudget(false);
+      setEditingBudget(null);
     } catch (err) {
       setServerError(err.response?.data?.message || "Failed to add budget.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const openAddBudget = () => {
+    setEditingBudget(null);
+    reset({ category: "", budget: "", color: "bg-emerald-500" });
+    setShowAddBudget(true);
+  };
+
+  const openEditBudget = (budget) => {
+    setEditingBudget(budget);
+    reset({ category: budget.category, budget: budget.amount, color: budget.color || "bg-emerald-500" });
+    setServerError("");
+    setShowAddBudget(true);
+  };
+
+  const onDeleteBudget = async (budget) => {
+    if (!window.confirm(`Delete the ${budget.category} budget?`)) return;
+    try {
+      await API.delete(`/budgets/${budget._id || budget.id}`);
+      setBudgets((currentBudgets) => currentBudgets.filter((item) => (item._id || item.id) !== (budget._id || budget.id)));
+    } catch (err) {
+      setServerError(err.response?.data?.message || "Failed to delete budget.");
     }
   };
 
@@ -107,7 +144,7 @@ const BudgetPage = () => {
             </p>
           </div>
           <button
-            onClick={() => setShowAddBudget(true)}
+            onClick={openAddBudget}
             className="bg-emerald-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-600 transition-all duration-200 flex items-center space-x-2"
           >
             <Plus className="w-5 h-5" />
@@ -187,12 +224,14 @@ const BudgetPage = () => {
           </h2>
           <div className="space-y-6">
             {budgets.map((budget) => {
-              const percentage = (budget.spent / budget.budget) * 100;
-              const remaining = budget.budget - budget.spent;
+              const amount = Number(budget.amount) || 0;
+              const spent = Number(budget.spent) || 0;
+              const percentage = amount ? (spent / amount) * 100 : 0;
+              const remaining = amount - spent;
 
               return (
                 <div
-                  key={budget.id}
+                  key={budget._id || budget.id}
                   className="p-6 border border-gray-200 rounded-xl hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center justify-between mb-4">
@@ -205,10 +244,10 @@ const BudgetPage = () => {
                       </h3>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <button className="p-2 text-gray-400 hover:text-emerald-600 transition-colors">
+                      <button type="button" onClick={() => openEditBudget(budget)} aria-label={`Edit ${budget.category} budget`} className="p-2 text-gray-400 hover:text-emerald-600 transition-colors">
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                      <button type="button" onClick={() => onDeleteBudget(budget)} aria-label={`Delete ${budget.category} budget`} className="p-2 text-gray-400 hover:text-red-600 transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -218,13 +257,13 @@ const BudgetPage = () => {
                     <div>
                       <p className="text-sm text-gray-500">Budget</p>
                       <p className="font-semibold text-gray-900">
-                        ${Number(budget.budget).toLocaleString()}
+                        ${amount.toLocaleString()}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Spent</p>
                       <p className="font-semibold text-gray-900">
-                        ${Number(budget.spent).toLocaleString()}
+                        ${spent.toLocaleString()}
                       </p>
                     </div>
                     <div>
@@ -241,9 +280,9 @@ const BudgetPage = () => {
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm text-gray-500">Progress</span>
                       <div
-                        className={`flex items-center space-x-1 ${getStatusColor(budget.spent, budget.budget)}`}
+                        className={`flex items-center space-x-1 ${getStatusColor(spent, amount)}`}
                       >
-                        {getStatusIcon(budget.spent, budget.budget)}
+                        {getStatusIcon(spent, amount)}
                         <span className="text-sm font-medium">
                           {isNaN(percentage) ? 0 : Math.round(percentage)}%
                         </span>
@@ -274,21 +313,22 @@ const BudgetPage = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Add New Budget
+                {editingBudget ? "Edit Budget" : "Add New Budget"}
               </h2>
               <form onSubmit={handleSubmit(onAddBudget)} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Category
                   </label>
-                  <input
-                    type="text"
+                  <select
                     {...register("category", {
                       required: "Category is required",
                     })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
-                    placeholder="e.g., Groceries"
-                  />
+                  >
+                    <option value="">Select category</option>
+                    {expenseCategories.map((category) => <option key={category} value={category}>{category}</option>)}
+                  </select>
                   {errors.category && (
                     <p className="text-red-600 text-sm">
                       {errors.category.message}
@@ -308,6 +348,8 @@ const BudgetPage = () => {
                       step="0.01"
                       {...register("budget", {
                         required: "Budget amount is required",
+                        valueAsNumber: true,
+                        min: { value: 0.01, message: "Budget amount must be greater than 0" },
                       })}
                       className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400"
                       placeholder="0.00"
@@ -341,6 +383,7 @@ const BudgetPage = () => {
                     type="button"
                     onClick={() => {
                       setShowAddBudget(false);
+                      setEditingBudget(null);
                       reset();
                       setServerError("");
                     }}
@@ -353,7 +396,7 @@ const BudgetPage = () => {
                     disabled={isLoading}
                     className="flex-1 px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all duration-200 disabled:opacity-50"
                   >
-                    {isLoading ? "Adding..." : "Add Budget"}
+                    {isLoading ? "Saving..." : editingBudget ? "Save Budget" : "Add Budget"}
                   </button>
                 </div>
               </form>

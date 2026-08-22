@@ -224,7 +224,7 @@ const DashboardPage = () => {
               {currentBudget.length > 0 ? (
                 currentBudget.map((budget) => (
                   <div
-                    key={budget.id}
+                    key={budget._id || budget.id}
                     className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl transition-colors"
                   >
                     <div className="flex items-center space-x-4">
@@ -234,12 +234,12 @@ const DashboardPage = () => {
                       <div>
                         <p className="font-medium text-gray-900">{budget.category}</p>
                         <p className="text-sm text-gray-500">
-                          ${budget.spent.toLocaleString()} of ${budget.amount.toLocaleString()}
+                          ${(Number(budget.spent) || 0).toLocaleString()} of ${(Number(budget.amount) || 0).toLocaleString()}
                         </p>
                       </div>
                     </div>
                     <div className="text-sm text-emerald-600">
-                      {Math.round((budget.spent / budget.amount) * 100)}%
+                      {Math.round((Number(budget.amount) ? (Number(budget.spent || 0) / Number(budget.amount)) * 100 : 0))}%
                     </div>
                   </div>
                 ))

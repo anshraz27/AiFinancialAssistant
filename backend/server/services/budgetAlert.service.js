@@ -1,7 +1,6 @@
 const Budget = require('../models/Budget');
 const Transaction = require('../models/Transaction');
-const User = require('../models/User');
-const { sendBudgetAlertEmail } = require('../utils/emailService');
+const { budgetAlertQueue } = require('../jobs/queues');
 const { emit } = require('../events/domainEvents');
 const events = require('../events/eventTypes');
 
@@ -20,8 +19,11 @@ const checkBudgetAlert = async ({ userId, category }) => {
     if (!crossed) continue;
     const payload = { userId: userId.toString(), budgetId: budget.id, category, spent, limit: budget.amount, threshold: budget.alertThreshold };
     emit(events.BUDGET_THRESHOLD_EXCEEDED, payload);
-    const user = await User.findById(userId).select('email');
-    if (budget.notifications.email && user?.email) await sendBudgetAlertEmail(user.email, category, spent, budget.amount);
+    if (budget.notifications.email) {
+      await budgetAlertQueue.add('send-email', {
+        userId: userId.toString(), category, spent, limit: budget.amount,
+      });
+    }
   }
 };
 
