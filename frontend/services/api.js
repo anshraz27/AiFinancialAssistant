@@ -1,9 +1,13 @@
 import axios from "axios";
 
-// In production (Vercel), VITE_API_URL points to the Render backend (e.g. https://finscope-api.onrender.com/api)
-// In local dev, falls back to localhost via Vite proxy
+const configuredBaseURL = import.meta.env.VITE_API_URL || "/api";
+const baseURL =
+  configuredBaseURL === "/api" || configuredBaseURL.endsWith("/api")
+    ? configuredBaseURL
+    : `${configuredBaseURL.replace(/\/$/, "")}/api`;
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },
