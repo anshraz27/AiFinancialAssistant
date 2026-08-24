@@ -15,7 +15,16 @@ const MONGODB_URI =
 // Database connection
 mongoose
   .connect(MONGODB_URI)
-  .then((e) => console.log("✓ MongoDB Connected"))
+  .then((e) => {
+    console.log("✓ MongoDB Connected");
+    // Start BullMQ workers in the same process so jobs are processed
+    // without needing a separate `npm run worker` command.
+    // In production, run workers separately via `node worker.js` for scaling.
+    require('./server/workers/receiptWorker');
+    require('./server/workers/reportWorker');
+    require('./server/workers/budgetAlertWorker');
+    console.log("✓ Background workers started");
+  })
   .catch((err) => console.error("✗ MongoDB Connection Error:", err));
 
 app.listen(PORT, () => {

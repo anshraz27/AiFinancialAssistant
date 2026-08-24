@@ -5,10 +5,31 @@ const { emit } = require('../events/domainEvents');
 const events = require('../events/eventTypes');
 
 const checkBudgetAlert = async ({ userId, category, queueEmail = true }) => {
-  const budgets = await Budget.find({ userId, category, isActive: true });
+  // Case-insensitive category lookup — budget may store "food" while
+  // transactions use the canonical "Food" from the category list.
+  const budgets = await Budget.find({
+    userId,
+    category: { $regex: new RegExp(`^${category}$`, 'i') },
+    isActive: true,
+  });
+
   for (const budget of budgets) {
+    // Normalize dates to day boundaries so that a budget created at 19:41
+    // on Aug 24 still captures expenses dated Aug 24 (which default to 00:00).
+    const periodStart = new Date(budget.startDate);
+    periodStart.setHours(0, 0, 0, 0);
+    const periodEnd = new Date(budget.endDate);
+    periodEnd.setHours(23, 59, 59, 999);
+
     const [result] = await Transaction.aggregate([
-      { $match: { user: budget.userId, category, type: 'expense', date: { $gte: budget.startDate, $lte: budget.endDate } } },
+      {
+        $match: {
+          user: budget.userId,
+          category: { $regex: new RegExp(`^${budget.category}$`, 'i') },
+          type: 'expense',
+          date: { $gte: periodStart, $lte: periodEnd },
+        },
+      },
       { $group: { _id: null, total: { $sum: '$amount' } } },
     ]);
     const spent = result?.total || 0;

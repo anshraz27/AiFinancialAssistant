@@ -106,7 +106,7 @@ budgetSchema.methods.updateSpent = async function () {
   const result = await Transaction.aggregate([
     {
       $match: {
-        userId: this.userId,
+        user: this.userId,
         category: this.category,
         type: "expense",
         date: {
