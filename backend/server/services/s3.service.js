@@ -6,7 +6,7 @@
  * for easy management and per-user isolation.
  */
 
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const path = require('path');
 
 // Initialize S3 client from environment variables
@@ -64,4 +64,47 @@ const uploadReceiptImage = async (fileBuffer, originalName, userId) => {
   }
 };
 
-module.exports = { uploadReceiptImage };
+/**
+ * Download a receipt image from S3 and return the raw Buffer.
+ *
+ * Used by BullMQ workers that only receive the S3 URL (not the
+ * original multer buffer). The image is re-downloaded so it can be
+ * base64-encoded for the Vision Language Model, which cannot access
+ * private S3 objects directly.
+ *
+ * @param {string} imageUrl - The full S3 URL returned by uploadReceiptImage
+ * @returns {{ buffer: Buffer, contentType: string }}
+ * @throws {Error} On S3 download failure
+ */
+const downloadReceiptImage = async (imageUrl) => {
+  try {
+    // Extract the S3 key from the URL
+    // URL format: https://{bucket}.s3.{region}.amazonaws.com/{key}
+    const url = new URL(imageUrl);
+    const key = decodeURIComponent(url.pathname.slice(1)); // remove leading '/'
+
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+    });
+
+    const response = await s3Client.send(command);
+
+    // Convert the readable stream to a Buffer
+    const chunks = [];
+    for await (const chunk of response.Body) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+
+    return {
+      buffer,
+      contentType: response.ContentType || 'image/jpeg',
+    };
+  } catch (error) {
+    console.error('S3 download error:', error.message);
+    throw new Error(`Failed to download receipt image from storage: ${error.message}`);
+  }
+};
+
+module.exports = { uploadReceiptImage, downloadReceiptImage };
