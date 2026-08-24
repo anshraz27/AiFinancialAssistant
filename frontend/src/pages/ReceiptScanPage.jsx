@@ -48,6 +48,8 @@ const STATES = {
   ERROR: "error",
 };
 
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
 const ReceiptScanPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -157,8 +159,21 @@ const ReceiptScanPage = () => {
         },
       });
 
-      if (response.data.success) {
-        const expense = response.data.expense;
+      if (response.data.success && response.data.jobId) {
+        let job;
+        for (let attempt = 0; attempt < 60; attempt += 1) {
+          await wait(1000);
+          const jobResponse = await API.get(`/jobs/receipt/${response.data.jobId}`);
+          job = jobResponse.data;
+          if (job.state === "completed" || job.state === "failed") break;
+        }
+
+        if (job?.state !== "completed" || !job.result?.expenseId) {
+          throw new Error(job?.failedReason || "Receipt processing did not complete.");
+        }
+
+        const expenseResponse = await API.get(`/receipts/${job.result.expenseId}`);
+        const expense = expenseResponse.data.expense;
         setScannedExpense(expense);
 
         // Pre-fill the form with extracted data

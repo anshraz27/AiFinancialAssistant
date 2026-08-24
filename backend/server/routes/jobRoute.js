@@ -1,13 +1,19 @@
 const express = require('express');
 const { protect } = require('../middleware/authMiddleware');
-const { receiptQueue, reportQueue } = require('../jobs/queues');
+const { receiptQueue, reportQueue, budgetAlertQueue } = require('../jobs/queues');
 
 const router = express.Router();
 router.use(protect);
 
 router.get('/:queue/:id', async (req, res, next) => {
   try {
-    const queue = req.params.queue === 'receipt' ? receiptQueue : req.params.queue === 'report' ? reportQueue : null;
+    const queue = req.params.queue === 'receipt'
+      ? receiptQueue
+      : req.params.queue === 'report'
+        ? reportQueue
+        : req.params.queue === 'budget'
+          ? budgetAlertQueue
+          : null;
     if (!queue) return res.status(404).json({ message: 'Job queue not found.' });
     const job = await queue.getJob(req.params.id);
     if (!job || job.data.userId !== req.user._id.toString()) return res.status(404).json({ message: 'Job not found.' });

@@ -182,7 +182,7 @@ const DashboardPage = () => {
             <div className="space-y-4">
               {recentTransactions.map((transaction) => (
                 <div
-                  key={transaction.id}
+                  key={transaction._id || transaction.id}
                   className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl transition-colors"
                 >
                   <div className="flex items-center space-x-4">

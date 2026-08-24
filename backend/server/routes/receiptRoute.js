@@ -9,10 +9,13 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const { uploadReceipt } = require('../middleware/upload.middleware');
-const { scanReceipt, confirmReceiptExpense } = require('../controllers/receiptController');
+const { scanReceipt, confirmReceiptExpense, getReceiptExpense } = require('../controllers/receiptController');
 
 // Scan a receipt: auth first, then upload middleware, then controller
 router.post('/scan', protect, uploadReceipt, scanReceipt);
+
+// Get a queued receipt expense after the worker finishes processing it
+router.get('/:id', protect, getReceiptExpense);
 
 // Confirm a scanned expense after user review
 router.put('/:id/confirm', protect, confirmReceiptExpense);

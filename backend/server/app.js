@@ -24,6 +24,7 @@ const graphqlSchema = require('./graphql/schema');
 const graphqlRoot = require('./graphql/resolvers');
 const { protect } = require('./middleware/authMiddleware');
 const { startEventSubscriber } = require('./events/domainEvents');
+require('./events/budgetAlert.listener');
 
 
 const app = express();

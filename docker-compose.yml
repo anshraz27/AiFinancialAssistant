@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_DATABASE: finscope
     volumes:
       - mongodb_data:/data/db
-    
+
     networks:
       - finapp
     healthcheck:
@@ -21,10 +21,12 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
+    command: redis-server --appendonly yes --appendfsync everysec
     container_name: fin_redis
     ports:
       - "6379:6379"
-    
+    volumes:
+      - redis_data:/data
     networks:
       - finapp
     healthcheck:
@@ -147,3 +149,4 @@ volumes:
   mongodb_data:
   backend_node_modules:
   frontend_node_modules:
+  redis_data:

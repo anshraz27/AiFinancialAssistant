@@ -19,6 +19,7 @@
 const { uploadReceiptImage } = require('../services/s3.service');
 const { confirmExpense } = require('../services/expense.service');
 const { addReceiptScan } = require('../jobs/receiptQueue');
+const Transaction = require('../models/Transaction');
 
 /**
  * POST /api/receipts/scan
@@ -126,4 +127,18 @@ const confirmReceiptExpense = async (req, res) => {
   }
 };
 
-module.exports = { scanReceipt, confirmReceiptExpense };
+const getReceiptExpense = async (req, res) => {
+  const expense = await Transaction.findOne({
+    _id: req.params.id,
+    user: req.user._id,
+    source: 'receipt_scan',
+  });
+
+  if (!expense) {
+    return res.status(404).json({ success: false, message: 'Receipt expense not found.' });
+  }
+
+  return res.json({ success: true, expense });
+};
+
+module.exports = { scanReceipt, confirmReceiptExpense, getReceiptExpense };

@@ -4,7 +4,7 @@ const { budgetAlertQueue } = require('../jobs/queues');
 const { emit } = require('../events/domainEvents');
 const events = require('../events/eventTypes');
 
-const checkBudgetAlert = async ({ userId, category }) => {
+const checkBudgetAlert = async ({ userId, category, queueEmail = true }) => {
   const budgets = await Budget.find({ userId, category, isActive: true });
   for (const budget of budgets) {
     const [result] = await Transaction.aggregate([
@@ -19,7 +19,7 @@ const checkBudgetAlert = async ({ userId, category }) => {
     if (!crossed) continue;
     const payload = { userId: userId.toString(), budgetId: budget.id, category, spent, limit: budget.amount, threshold: budget.alertThreshold };
     emit(events.BUDGET_THRESHOLD_EXCEEDED, payload);
-    if (budget.notifications.email) {
+    if (queueEmail && budget.notifications.email) {
       await budgetAlertQueue.add('send-email', {
         userId: userId.toString(), category, spent, limit: budget.amount,
       });

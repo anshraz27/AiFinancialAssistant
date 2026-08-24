@@ -1,6 +1,5 @@
 const Transaction = require("../models/Transaction");
 const { validationResult } = require("express-validator");
-const { checkBudgetAlert } = require('../services/budgetAlert.service');
 const { emit } = require('../events/domainEvents');
 const events = require('../events/eventTypes');
 
@@ -41,9 +40,7 @@ const AddTransaction = async (req, res) => {
 
     await transaction.save();
 
-    emit(events.TRANSACTION_CREATED, { userId: user.toString(), transactionId: transaction.id, type, category, amount });
-    if (type === 'expense') await checkBudgetAlert({ userId: user, category });
-
+    emit(events.TRANSACTION_CREATED, { userId: user.toString(), transactionId: transaction.id, transactionType: type, category, amount });
     res.status(201).json({
       message: "Transaction added successfully",
       transaction,
@@ -130,5 +127,4 @@ module.exports = {
   DeleteTransaction,
   UpdateTransaction,
   GetAllTransactions,
-  checkBudgetAlert
 };
