@@ -41,4 +41,6 @@ router.post(
   UserLogin 
 );
 
+router.get("/profile", protect, getUserProfile);
+
 module.exports = router;

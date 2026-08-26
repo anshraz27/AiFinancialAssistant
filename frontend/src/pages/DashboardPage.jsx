@@ -25,6 +25,7 @@ const DashboardPage = () => {
   })
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [currentBudget,setCurrentBudget] = useState([]);
+  const [user, setUser] = useState({ firstName: "", lastName: "" });
 
 
   useEffect(() => {
@@ -33,6 +34,10 @@ const DashboardPage = () => {
         const query = `
           query {
             dashboardAnalytics {
+              user {
+                firstName
+                lastName
+              }
               dashboardSummary {
                 balance
                 monthlyIncome
@@ -62,6 +67,7 @@ const DashboardPage = () => {
 
         if (!data) throw new Error("No data returned from GraphQL");
 
+        setUser(data.user || { firstName: "", lastName: "" });
         setFinancialData({
           totalBalance: data.dashboardSummary.balance || 0,
           monthlyIncome: data.dashboardSummary.monthlyIncome || 0,
@@ -115,7 +121,9 @@ const DashboardPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome back!</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back{user.firstName ? `, ${user.firstName} ${user.lastName}` : ""}!
+          </h1>
           <p className="text-gray-600 mt-2">Here's your financial overview for today.</p>
         </div>
 

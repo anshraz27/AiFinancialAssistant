@@ -1,8 +1,10 @@
 const Transaction = require('../models/Transaction');
 const Budget = require('../models/Budget');
+const User = require('../models/User');
 
 const getDashboardAnalytics = async (userId) => {
-  const [totals, categories, cashflow, budgets, recentTransactions] = await Promise.all([
+  const [user, totals, categories, cashflow, budgets, recentTransactions] = await Promise.all([
+    User.findById(userId).select('firstName lastName email'),
     Transaction.aggregate([{ $match: { user: userId } }, { $group: { _id: '$type', total: { $sum: '$amount' } } }]),
     Transaction.aggregate([{ $match: { user: userId, type: 'expense' } }, { $group: { _id: '$category', total: { $sum: '$amount' } } }, { $sort: { total: -1 } }]),
     Transaction.aggregate([{ $match: { user: userId } }, { $group: { _id: { month: { $dateToString: { format: '%Y-%m', date: '$date' } }, type: '$type' }, total: { $sum: '$amount' } } }, { $sort: { '_id.month': 1 } }]),
@@ -29,6 +31,7 @@ const getDashboardAnalytics = async (userId) => {
   const monthlySavings = monthlyIncome - monthlyExpenses;
 
   return {
+    user: { firstName: user.firstName, lastName: user.lastName, email: user.email },
     dashboardSummary: { 
       balance: income - expenses, 
       income, 

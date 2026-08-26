@@ -26,9 +26,9 @@ const ProfilePage = () => {
         const response = await API.get('/auth/profile')
         const userData = response.data.user
         setProfileData({
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          email: userData.email,
+          firstName: userData.firstName || "",
+          lastName: userData.lastName || "",
+          email: userData.email || "",
           phone: userData.profile?.phone || "",
           address: "",
           dateOfBirth: userData.profile?.dateOfBirth?.split('T')[0] || "",
