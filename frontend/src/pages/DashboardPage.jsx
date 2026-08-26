@@ -30,23 +30,53 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const summaryRes = await API.get("/dashboard/summary");
-        const summary = summaryRes.data?.data || {};
+        const query = `
+          query {
+            dashboardAnalytics {
+              dashboardSummary {
+                balance
+                monthlyIncome
+                monthlyExpenses
+                monthlySavings
+              }
+              recentTransactions {
+                _id
+                description
+                category
+                amount
+                date
+                type
+              }
+              budgetHealth {
+                _id
+                category
+                spent
+                amount
+              }
+            }
+          }
+        `;
+
+        const response = await API.post("/graphql", { query });
+        const data = response.data?.data?.dashboardAnalytics;
+
+        if (!data) throw new Error("No data returned from GraphQL");
 
         setFinancialData({
-          totalBalance:
-            (summary.totalIncome || 0) - (summary.totalExpense || 0),
-          monthlyIncome: summary.monthlyIncome || 0,
-          monthlyExpenses: summary.monthlyExpense || 0,
-          savings: summary.savings || 0,
+          totalBalance: data.dashboardSummary.balance || 0,
+          monthlyIncome: data.dashboardSummary.monthlyIncome || 0,
+          monthlyExpenses: data.dashboardSummary.monthlyExpenses || 0,
+          savings: data.dashboardSummary.monthlySavings || 0,
           savingsGoal: 10000,
         });
 
-        const transactionsRes = await API.get("/dashboard/recent");
-        setRecentTransactions(transactionsRes.data?.transactions || []);
+        const formattedTransactions = (data.recentTransactions || []).map(t => ({
+          ...t,
+          date: new Date(t.date).toISOString().split('T')[0]
+        }));
+        setRecentTransactions(formattedTransactions);
 
-        const budgetsRes = await API.get("/dashboard/budgets");
-        setCurrentBudget(budgetsRes.data?.budgets?.slice(0, 5) || []);
+        setCurrentBudget(data.budgetHealth || []);
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       }
