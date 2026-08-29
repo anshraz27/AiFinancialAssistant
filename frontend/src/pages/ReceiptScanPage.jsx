@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import {
@@ -49,6 +49,7 @@ const STATES = {
 };
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+const RECEIPT_SCAN_SESSION_KEY = "receiptScanSession";
 
 const ReceiptScanPage = () => {
   const navigate = useNavigate();
@@ -66,8 +67,138 @@ const ReceiptScanPage = () => {
     handleSubmit,
     reset,
     setValue,
+    watch,
+    getValues,
     formState: { errors },
   } = useForm();
+
+  const persistSession = useCallback((data) => {
+    try {
+      localStorage.setItem(RECEIPT_SCAN_SESSION_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.warn("Failed to persist receipt scan session:", error);
+    }
+  }, []);
+
+  const clearPersistedSession = useCallback(() => {
+    try {
+      localStorage.removeItem(RECEIPT_SCAN_SESSION_KEY);
+    } catch (error) {
+      console.warn("Failed to clear receipt scan session:", error);
+    }
+  }, []);
+
+  const hydrateFormFromExpense = useCallback((expense, formValues = null) => {
+    const defaultValues = {
+      merchant: expense?.merchant || "",
+      amount: expense?.amount || "",
+      date: expense?.date
+        ? new Date(expense.date).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      category: expense?.category || "Other",
+      description: expense?.description || "",
+      paymentMethod: expense?.paymentMethod || "card",
+      ...formValues,
+    };
+
+    Object.entries(defaultValues).forEach(([field, value]) => {
+      setValue(field, value);
+    });
+  }, [setValue]);
+
+  const buildDraftExpense = useCallback((extractedExpense, receiptImageUrl) => ({
+    ...extractedExpense,
+    _id: null,
+    source: "receipt_scan",
+    status: "pending_review",
+    receipt: {
+      url: receiptImageUrl || extractedExpense?.receipt?.url || null,
+      publicId: null,
+    },
+    date: extractedExpense?.date || new Date().toISOString(),
+  }), []);
+
+  const pollReceiptJob = useCallback(async (jobId) => {
+    let job;
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      await wait(1000);
+      const jobResponse = await API.get(`/jobs/receipt/${jobId}`);
+      job = jobResponse.data;
+      if (job.state === "completed" || job.state === "failed") break;
+    }
+
+    if (job?.state !== "completed") {
+      throw new Error(job?.failedReason || "Receipt processing did not complete.");
+    }
+
+    if (job.result?.extractedExpense) {
+      return buildDraftExpense(job.result.extractedExpense, job.result.receiptImageUrl);
+    }
+
+    // Backward compatibility for older worker result shape.
+    if (job.result?.expenseId) {
+      const expenseResponse = await API.get(`/receipts/${job.result.expenseId}`);
+      return expenseResponse.data.expense;
+    }
+
+    throw new Error("Receipt processing completed without extracted data.");
+  }, [buildDraftExpense]);
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const raw = localStorage.getItem(RECEIPT_SCAN_SESSION_KEY);
+        if (!raw) return;
+
+        const session = JSON.parse(raw);
+        if (!session || !session.phase) return;
+
+        if (session.receiptImageUrl) {
+          setPreviewUrl(session.receiptImageUrl);
+        }
+
+        if (session.phase === STATES.ANALYZING && session.jobId) {
+          setState(STATES.ANALYZING);
+          const expense = await pollReceiptJob(session.jobId);
+          setScannedExpense(expense);
+          hydrateFormFromExpense(expense, session.formValues);
+          setState(STATES.REVIEW);
+          persistSession({
+            phase: STATES.REVIEW,
+            receiptImageUrl: expense?.receipt?.url || session.receiptImageUrl || null,
+            scannedExpense: expense,
+            formValues: { ...getValues() },
+          });
+          return;
+        }
+
+        if (session.phase === STATES.REVIEW && session.scannedExpense) {
+          setScannedExpense(session.scannedExpense);
+          hydrateFormFromExpense(session.scannedExpense, session.formValues);
+          setState(STATES.REVIEW);
+        }
+      } catch (error) {
+        console.warn("Failed to restore receipt scan session:", error);
+      }
+    };
+
+    restoreSession();
+  }, [getValues, hydrateFormFromExpense, persistSession, pollReceiptJob]);
+
+  useEffect(() => {
+    const subscription = watch((formValues) => {
+      if (state !== STATES.REVIEW || !scannedExpense) return;
+
+      persistSession({
+        phase: STATES.REVIEW,
+        receiptImageUrl: scannedExpense?.receipt?.url || previewUrl || null,
+        scannedExpense,
+        formValues,
+      });
+    });
+
+    return () => subscription.unsubscribe();
+  }, [persistSession, previewUrl, scannedExpense, state, watch]);
 
   // --- File Selection Handlers ---
 
@@ -103,24 +234,27 @@ const ReceiptScanPage = () => {
     if (file) handleFileSelect(file);
   };
 
-  const handleDragOver = useCallback((e) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragOver(true);
-  }, []);
+  };
 
-  const handleDragLeave = useCallback((e) => {
+  const handleDragLeave = (e) => {
     e.preventDefault();
     setIsDragOver(false);
-  }, []);
+  };
 
-  const handleDrop = useCallback((e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
     setIsDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (file) handleFileSelect(file);
-  }, []);
+  };
 
   const clearFile = () => {
+    if (previewUrl && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
     setSelectedFile(null);
     setPreviewUrl(null);
     setScannedExpense(null);
@@ -128,6 +262,7 @@ const ReceiptScanPage = () => {
     setErrorMessage("");
     setUploadProgress(0);
     reset();
+    clearPersistedSession();
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -160,36 +295,27 @@ const ReceiptScanPage = () => {
       });
 
       if (response.data.success && response.data.jobId) {
-        let job;
-        for (let attempt = 0; attempt < 60; attempt += 1) {
-          await wait(1000);
-          const jobResponse = await API.get(`/jobs/receipt/${response.data.jobId}`);
-          job = jobResponse.data;
-          if (job.state === "completed" || job.state === "failed") break;
-        }
+        const receiptImageUrl = response.data.receiptImageUrl || previewUrl || null;
+        setPreviewUrl(receiptImageUrl);
+        setState(STATES.ANALYZING);
 
-        if (job?.state !== "completed" || !job.result?.expenseId) {
-          throw new Error(job?.failedReason || "Receipt processing did not complete.");
-        }
+        persistSession({
+          phase: STATES.ANALYZING,
+          jobId: response.data.jobId,
+          receiptImageUrl,
+        });
 
-        const expenseResponse = await API.get(`/receipts/${job.result.expenseId}`);
-        const expense = expenseResponse.data.expense;
+        const expense = await pollReceiptJob(response.data.jobId);
         setScannedExpense(expense);
-
-        // Pre-fill the form with extracted data
-        setValue("merchant", expense.merchant || "");
-        setValue("amount", expense.amount || "");
-        setValue(
-          "date",
-          expense.date
-            ? new Date(expense.date).toISOString().split("T")[0]
-            : new Date().toISOString().split("T")[0]
-        );
-        setValue("category", expense.category || "Other");
-        setValue("description", expense.description || "");
-        setValue("paymentMethod", expense.paymentMethod || "card");
+        hydrateFormFromExpense(expense);
 
         setState(STATES.REVIEW);
+        persistSession({
+          phase: STATES.REVIEW,
+          receiptImageUrl: expense?.receipt?.url || receiptImageUrl,
+          scannedExpense: expense,
+          formValues: { ...getValues() },
+        });
       }
     } catch (error) {
       console.error("Scan failed:", error);
@@ -198,13 +324,17 @@ const ReceiptScanPage = () => {
           "Failed to scan receipt. Please try again."
       );
       setState(STATES.ERROR);
+      persistSession({
+        phase: STATES.ERROR,
+        receiptImageUrl: previewUrl,
+      });
     }
   };
 
   // --- Confirm Expense ---
 
   const onConfirm = async (formData) => {
-    if (!scannedExpense?._id) return;
+    if (!scannedExpense) return;
 
     setState(STATES.CONFIRMING);
 
@@ -218,7 +348,17 @@ const ReceiptScanPage = () => {
         paymentMethod: formData.paymentMethod,
       };
 
-      await API.put(`/receipts/${scannedExpense._id}/confirm`, updates);
+      if (scannedExpense._id) {
+        await API.put(`/receipts/${scannedExpense._id}/confirm`, updates);
+      } else {
+        await API.put("/receipts/draft/confirm", {
+          ...updates,
+          scanData: scannedExpense,
+          receiptImageUrl: scannedExpense?.receipt?.url || previewUrl || null,
+        });
+      }
+
+      clearPersistedSession();
       setState(STATES.SUCCESS);
 
       // Navigate to transactions after a brief success message
@@ -240,7 +380,7 @@ const ReceiptScanPage = () => {
       case STATES.UPLOADING:
         return "Uploading receipt...";
       case STATES.ANALYZING:
-        return "Analyzing with AI...";
+        return "Analyzing with AI (safe to navigate away)...";
       case STATES.CONFIRMING:
         return "Saving expense...";
       default:
@@ -336,7 +476,7 @@ const ReceiptScanPage = () => {
                 Receipt Image
               </h2>
 
-              {!selectedFile ? (
+              {!previewUrl ? (
                 /* Drag & Drop Zone */
                 <div
                   onDragOver={handleDragOver}

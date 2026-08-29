@@ -4,11 +4,8 @@
  * Handles the receipt scanning workflow:
  * 1. Validate uploaded image exists
  * 2. Upload to S3
- * 3. Call VLM for analysis
- * 4. Validate AI output against DB schema
- * 5. Normalize extracted data
- * 6. Save as draft expense (pending_review)
- * 7. Return for frontend review
+ * 3. Queue async AI analysis job
+ * 4. Return job details for frontend polling
  *
  * Also handles expense confirmation after user review/edits.
  *
@@ -17,15 +14,15 @@
  */
 
 const { uploadReceiptImage } = require('../services/s3.service');
-const { confirmExpense } = require('../services/expense.service');
+const { confirmExpense, createConfirmedExpense } = require('../services/expense.service');
 const { addReceiptScan } = require('../jobs/receiptQueue');
 const Transaction = require('../models/Transaction');
 
 /**
  * POST /api/receipts/scan
  *
- * Scan a receipt image and extract expense data using the VLM.
- * The expense is saved as pending_review for the user to confirm.
+ * Queue receipt analysis and return a job ID.
+ * No transaction is persisted until explicit confirmation.
  */
 const scanReceipt = async (req, res) => {
   try {
@@ -74,6 +71,7 @@ const scanReceipt = async (req, res) => {
       success: true,
       message: 'Receipt scan queued. Check the job status for the draft expense.',
       jobId: job.id,
+      receiptImageUrl,
     });
   } catch (error) {
     console.error('Receipt scan error:', error);
@@ -95,6 +93,48 @@ const confirmReceiptExpense = async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
     const updates = req.body;
+
+    // New async flow: confirm a draft payload (not yet persisted in DB)
+    if (id === 'draft') {
+      const { scanData, receiptImageUrl } = updates || {};
+
+      if (!scanData || typeof scanData !== 'object') {
+        return res.status(400).json({
+          success: false,
+          message: 'Missing scan data. Please rescan the receipt and try again.',
+        });
+      }
+
+      const allowedUpdates = [
+        'amount', 'category', 'description', 'date', 'paymentMethod',
+        'merchant', 'tags', 'items', 'currency', 'subtotal', 'tax',
+      ];
+
+      const mergedExpense = { ...scanData };
+      for (const field of allowedUpdates) {
+        if (updates[field] !== undefined) {
+          mergedExpense[field] = updates[field];
+        }
+      }
+
+      if (!mergedExpense.amount || Number(mergedExpense.amount) <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'A valid amount is required to confirm this expense.',
+        });
+      }
+
+      const expense = await createConfirmedExpense({
+        ...mergedExpense,
+        amount: Number(mergedExpense.amount),
+      }, userId, receiptImageUrl || scanData?.receipt?.url || null);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Expense confirmed successfully.',
+        expense,
+      });
+    }
 
     const expense = await confirmExpense(id, userId, updates);
 

@@ -10,6 +10,31 @@ const Transaction = require('../models/Transaction');
 const { emit } = require('../events/domainEvents');
 const events = require('../events/eventTypes');
 
+const buildReceiptExpensePayload = (expenseData, userId, receiptUrl, status = 'pending_review') => ({
+  user: userId,
+  type: 'expense',
+  amount: expenseData.amount,
+  category: expenseData.category || 'Other',
+  description: expenseData.description || `Receipt scan - ${expenseData.merchant || 'Unknown'}`,
+  date: expenseData.date ? new Date(expenseData.date) : new Date(),
+  paymentMethod: expenseData.paymentMethod || 'card',
+  receipt: {
+    url: receiptUrl,
+    publicId: null,
+  },
+  tags: expenseData.tags || [],
+  isRecurring: false,
+  recurringFrequency: null,
+  merchant: expenseData.merchant || null,
+  currency: expenseData.currency || null,
+  subtotal: expenseData.subtotal || null,
+  tax: expenseData.tax || null,
+  items: expenseData.items || [],
+  confidence: expenseData.confidence || null,
+  source: 'receipt_scan',
+  status,
+});
+
 /**
  * Create a new expense from receipt scan data.
  * The expense is saved with status='pending_review' so the user
@@ -21,33 +46,24 @@ const events = require('../events/eventTypes');
  * @returns {Object} The created Transaction document
  */
 const createExpense = async (expenseData, userId, receiptUrl) => {
-  const transaction = new Transaction({
-    user: userId,
-    type: 'expense',
-    amount: expenseData.amount,
-    category: expenseData.category || 'Other',
-    description: expenseData.description || `Receipt scan - ${expenseData.merchant || 'Unknown'}`,
-    date: expenseData.date ? new Date(expenseData.date) : new Date(),
-    paymentMethod: expenseData.paymentMethod || 'card',
-    receipt: {
-      url: receiptUrl,
-      publicId: null,
-    },
-    tags: expenseData.tags || [],
-    isRecurring: false,
-    recurringFrequency: null,
-    // Receipt-scan-specific fields
-    merchant: expenseData.merchant || null,
-    currency: expenseData.currency || null,
-    subtotal: expenseData.subtotal || null,
-    tax: expenseData.tax || null,
-    items: expenseData.items || [],
-    confidence: expenseData.confidence || null,
-    source: 'receipt_scan',
-    status: 'pending_review',
-  });
+  const transaction = new Transaction(buildReceiptExpensePayload(expenseData, userId, receiptUrl, 'pending_review'));
 
   await transaction.save();
+  return transaction;
+};
+
+const createConfirmedExpense = async (expenseData, userId, receiptUrl) => {
+  const transaction = new Transaction(buildReceiptExpensePayload(expenseData, userId, receiptUrl, 'confirmed'));
+
+  await transaction.save();
+  emit(events.TRANSACTION_CREATED, {
+    userId: userId.toString(),
+    transactionId: transaction.id,
+    transactionType: 'expense',
+    category: transaction.category,
+    amount: transaction.amount,
+  });
+
   return transaction;
 };
 
@@ -96,4 +112,4 @@ const confirmExpense = async (expenseId, userId, updates = {}) => {
   return expense;
 };
 
-module.exports = { createExpense, confirmExpense };
+module.exports = { createExpense, createConfirmedExpense, confirmExpense };
